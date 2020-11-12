@@ -21,7 +21,6 @@ pipeline {
             //when{ 
               //  expression { ghprbTargetBranch == 'develop' }
                 //}
-
             steps {
                 script {
                     echo "entrei POM"
@@ -46,6 +45,7 @@ pipeline {
         
 
         stage("Build SIT") {
+        when { triggeredBy 'TimerTrigger' }
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
@@ -60,17 +60,6 @@ pipeline {
                 }
             }
         }  
-        /*
-        stage("zip workspace"){
-            when{
-              expression { ghprbTargetBranch == 'SIT' }
-            }
-            script{
-                sh "tar chvfz /var/jenkins_home/workspace/Jenkins_Nexus/${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP.tar.gz *
-"
-            }     
-         }          
-        */
         stage("Publish to Nexus") {
             steps {
                 script {
