@@ -29,7 +29,7 @@ pipeline {
                     def version = "${pom.version}"
 
                     def causes = currentBuild.getBuildCauses()
-                    if(causes.contains("Started by timer")){
+                    if(currentBuild.getBuildCauses()[0].shortDescription == "Started by timer"){
                     echo "aahhahahah"
                     }
 
