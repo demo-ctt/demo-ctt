@@ -24,20 +24,25 @@ pipeline {
 
             steps {
                 script {
+                    echo "entrei POM"
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
+
+
                     
                     if(!(version.contains("-SNAPSHOT"))){
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT" 
-                    
+                        echo "contem snapshot"
                     } 
                     sh "mvn package -DskipTests=true"
+                    echo "build dev com sucesso"
                 }
             }
         }
         
 
         stage("Build SIT") {
+            
             when { triggeredBy 'TimerTrigger' }
             steps {
                 script {
@@ -91,3 +96,4 @@ pipeline {
         }
     }
 }
+
