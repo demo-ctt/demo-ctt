@@ -14,15 +14,14 @@ pipeline {
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
     }
-    
+
 
     stages {  
         stage("Build DEV") {
+            if(!(manager.logContains("Started by timer"))){
             when{ 
-            	beforeAgent true
                 expression { ghprbTargetBranch == 'develop' }
                 }
-
             steps {
                 script {
                     echo "entrei POM aqui"
@@ -41,13 +40,10 @@ pipeline {
                 }
             }
         }
-        
+        }
 
         stage("Build SIT") {
-            when { 
-            beforeAgent false
-            triggeredBy 'TimerTrigger' 
-            }
+ 	 if(!(manager.logContains("Started by timer"))){
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
@@ -62,6 +58,7 @@ pipeline {
                 }
             }
         }  
+        }
         /*
         stage("zip workspace"){
             when{
