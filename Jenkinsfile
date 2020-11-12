@@ -24,7 +24,7 @@ pipeline {
 
             steps {
                 script {
-                    echo "entrei POM"
+                    echo "entrei POM aqui"
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
 
