@@ -62,7 +62,10 @@ pipeline {
         
 
         stage("Build SIT") {
-            when { triggeredBy 'TimerTrigger' }
+               when{ 
+                expression { ghprbTargetBranch == 'develop' }
+                }
+          //  when { triggeredBy 'TimerTrigger' }
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
