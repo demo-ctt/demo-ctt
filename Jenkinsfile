@@ -59,10 +59,12 @@ pipeline {
             }
          }
         
+        /*
         stage("zip workspace"){
         	script{
                 sh "tar chvfz /var/jenkins_home/workspace/Jenkins_Nexus/${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP.tar.gz *
-        	}     }
+        	}     
+        	}
     
         */      
         
