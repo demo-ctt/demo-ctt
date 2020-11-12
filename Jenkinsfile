@@ -18,10 +18,10 @@ pipeline {
 
     stages {  
         stage("Build DEV") {
+            steps{
             script{(!(manager.logContains("Started by timer")))}
-            when{ 
-                expression { ghprbTargetBranch == 'develop' }
-                }
+            }
+            when{ expression { ghprbTargetBranch == 'develop' } }
             steps {
                 script {
 			sh 'printenv'
@@ -42,9 +42,9 @@ pipeline {
         }
         
         stage("Build SIT") {
- 	 script{((manager.logContains("Started by timer")))}
-            steps {
-                script {
+            steps{
+            	script{
+            	if((manager.logContains("Started by timer")))
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
@@ -56,20 +56,17 @@ pipeline {
                     sh "mvn package -DskipTests=true"
                 }
             }
-        }  
+         }
+        
         
         /*
         stage("zip workspace"){
-            when{
-              expression { ghprbTargetBranch == 'SIT' }
-            }
-
         	script{
                 sh "tar chvfz /var/jenkins_home/workspace/Jenkins_Nexus/${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP.tar.gz *
-"
-        	}     
-         }          
-        */
+        	}     }
+    
+        */      
+        
         stage("Publish to Nexus") {
             steps {
                 script {
