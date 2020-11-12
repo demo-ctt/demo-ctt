@@ -17,26 +17,21 @@ pipeline {
 
 
     stages {  
-    steps{
-    	script{
-    	 def causes = currentBuild.getBuildCauses()
-                    print "${causes}"
-    	}
-    }
+   
+   
+   
+   
     
     
     
     
-    
-    /*
         stage("Build DEV") {
             steps{
             	script{
                     def causes = currentBuild.getBuildCauses()
                     echo "${causes}"
-            	   if(!(causes ==))){
-            	when{ expression { ghprbTargetBranch == 'develop' } }
-		sh 'printenv'
+            //	when{ expression { ghprbTargetBranch == 'develop' } }
+		        sh 'printenv'
 
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
