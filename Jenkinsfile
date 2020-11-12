@@ -1,5 +1,5 @@
 pipeline {
-    triggers { cron('*/5 * * * 1-5') }       
+    triggers { cron('*/11 * * * 1-5') }       
     
     agent {
             label 'master'
@@ -18,16 +18,19 @@ pipeline {
 
     stages {  
         stage("Build DEV") {
-            when{ 
-                expression { ghprbTargetBranch == 'develop' }
-                }
-
+            //when{ 
+              //  expression { ghprbTargetBranch == 'develop' }
+                //}
             steps {
                 script {
                     echo "entrei POM"
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
-
+        
+                    def causes = currentBuild.getBuildCauses()
+                    if(currentBuild.getBuildCauses().shortDescription == "Started by timer"){
+                    echo "aahhahahah"
+                    }
 
                     
                     if(!(version.contains("-SNAPSHOT"))){
@@ -42,8 +45,7 @@ pipeline {
         
 
         stage("Build SIT") {
-            
-            when { triggeredBy 'TimerTrigger' }
+        when { triggeredBy 'TimerTrigger' }
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
@@ -58,18 +60,6 @@ pipeline {
                 }
             }
         }  
-        /*
-        stage("zip workspace"){
-            when{
-              expression { ghprbTargetBranch == 'SIT' }
-            }
-
-        	script{
-                sh "tar chvfz /var/jenkins_home/workspace/Jenkins_Nexus/${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP.tar.gz *
-"
-        	}     
-         }          
-        */
         stage("Publish to Nexus") {
             steps {
                 script {
@@ -82,9 +72,6 @@ pipeline {
                         nexusUrl: NEXUS_URL, groupId: pom.groupId,
                         version: pom.version, repository: NEXUS_REPOSITORY,
                         credentialsId: NEXUS_CREDENTIAL_ID,
-                            
-
-
 
                         artifacts: [
                             [artifactId: pom.artifactId, classifier: '', file: artifactPath, type: pom.packaging],
@@ -96,4 +83,3 @@ pipeline {
         }
     }
 }
-
