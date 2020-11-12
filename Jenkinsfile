@@ -18,7 +18,7 @@ pipeline {
 
     stages {  
         stage("Build DEV") {
-            if(!(manager.logContains("Started by timer"))){
+            script{(!(manager.logContains("Started by timer")))}
             when{ 
                 expression { ghprbTargetBranch == 'develop' }
                 }
@@ -40,10 +40,9 @@ pipeline {
                 }
             }
         }
-        }
-
+        
         stage("Build SIT") {
- 	 if(!(manager.logContains("Started by timer"))){
+ 	 script{((manager.logContains("Started by timer")))}
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
@@ -58,7 +57,7 @@ pipeline {
                 }
             }
         }  
-        }
+        
         /*
         stage("zip workspace"){
             when{
