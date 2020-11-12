@@ -19,7 +19,7 @@ pipeline {
     stages {  
         stage("Build DEV") {
             when{ 
-                beforeAgent true
+                !triggeredBy 'TimerTrigger' 
                 expression { ghprbTargetBranch == 'develop' }
                 }
 
