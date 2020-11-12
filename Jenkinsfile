@@ -41,7 +41,7 @@ pipeline {
             }
         }
         
-        */
+     
         stage("Build SIT") {
             steps{
             	script{
