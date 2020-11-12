@@ -20,7 +20,7 @@ pipeline {
         stage("Build DEV") {
             steps{
             	script{
-            	(!(manager.logContains("Started by timer")))
+            	   if(!(manager.logContains("Started by timer"))){
             	when{ expression { ghprbTargetBranch == 'develop' } }
 		sh 'printenv'
 
@@ -35,15 +35,16 @@ pipeline {
                     } 
                     sh "mvn package -DskipTests=true"
                     echo "build dev com sucesso"
+                   }
                 }
             }
-            }
+        }
         
         
         stage("Build SIT") {
             steps{
             	script{
-            	if((manager.logContains("Started by timer")))
+            	if((manager.logContains("Started by timer"))){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
@@ -53,8 +54,9 @@ pipeline {
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
                     }
                     sh "mvn package -DskipTests=true"
-                }            
-                }
+                }  
+                }          
+            }
          }
         
         stage("zip workspace"){
