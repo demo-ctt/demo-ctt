@@ -17,27 +17,9 @@ pipeline {
     
 
     stages {  
-    
-    	
-    
-    
-    
-    	stage("teste"){
-    		steps{
-    		sh 'printenv'
-    		checkout scm 
-    		
-    		}
-    	}
-    
-    
-    
-    
-    
-    
-    
         stage("Build DEV") {
             when{ 
+            	beforeAgent true
                 expression { ghprbTargetBranch == 'develop' }
                 }
 
@@ -62,10 +44,10 @@ pipeline {
         
 
         stage("Build SIT") {
-               when{ 
-                expression { ghprbTargetBranch == 'develop' }
-                }
-          //  when { triggeredBy 'TimerTrigger' }
+            when { 
+            beforeAgent false
+            triggeredBy 'TimerTrigger' 
+            }
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
