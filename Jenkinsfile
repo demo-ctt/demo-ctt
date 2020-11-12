@@ -19,7 +19,6 @@ pipeline {
     stages {  
         stage("Build DEV") {
             when{ 
-                !triggeredBy 'TimerTrigger' 
                 expression { ghprbTargetBranch == 'develop' }
                 }
 
@@ -91,13 +90,4 @@ pipeline {
             }
         }
     }
-
-    post{
-        always{
-            deleteDir()
-        }
-    }
-
-
-
 }
