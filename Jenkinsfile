@@ -17,7 +17,7 @@ pipeline {
 
 
     stages {  
-    step{
+    steps{
     	script{
     	 def causes = currentBuild.getBuildCauses()
                     print "${causes}"
