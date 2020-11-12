@@ -29,9 +29,10 @@ pipeline {
                     def version = "${pom.version}"
 
                     def causes = currentBuild.getBuildCauses()
-                    print "${causes}"
-                    def specificCause = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
-                     print "${especificCause}"
+                    if(causes.contains("Started by timer")){
+                    echo "aahhahahah"
+                    }
+
                     
                     if(!(version.contains("-SNAPSHOT"))){
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT" 
