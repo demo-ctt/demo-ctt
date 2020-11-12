@@ -17,6 +17,18 @@ pipeline {
 
 
     stages {  
+    step{
+    	script{
+    	 def causes = currentBuild.getBuildCauses()
+                    echo "${causes}"
+    	}
+    }
+    
+    
+    
+    
+    
+    /*
         stage("Build DEV") {
             steps{
             	script{
@@ -42,7 +54,7 @@ pipeline {
             }
         }
         
-        
+        */
         stage("Build SIT") {
             steps{
             	script{
