@@ -17,6 +17,20 @@ pipeline {
     
 
     stages {  
+    
+    
+    	stage("teste"){
+    		steps{
+    		sh 'printenv'
+    		}
+    	}
+    
+    
+    
+    
+    
+    
+    
         stage("Build DEV") {
             when{ 
                 expression { ghprbTargetBranch == 'develop' }
@@ -42,7 +56,6 @@ pipeline {
         
 
         stage("Build SIT") {
-            
             when { triggeredBy 'TimerTrigger' }
             steps {
                 script {
@@ -83,9 +96,6 @@ pipeline {
                         version: pom.version, repository: NEXUS_REPOSITORY,
                         credentialsId: NEXUS_CREDENTIAL_ID,
                             
-
-
-
                         artifacts: [
                             [artifactId: pom.artifactId, classifier: '', file: artifactPath, type: pom.packaging],
                             [artifactId: pom.artifactId, classifier: '', file: "pom.xml", type: "pom"]
