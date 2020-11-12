@@ -17,14 +17,6 @@ pipeline {
 
 
     stages {  
-   
-   
-   
-   
-    
-    
-    
-    
         stage("Build DEV") {
             steps{
             	script{
@@ -68,14 +60,7 @@ pipeline {
             }
          }
         
-        /*
-        stage("zip workspace"){
-        	script{
-                sh "tar chvfz /var/jenkins_home/workspace/Jenkins_Nexus/${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP.tar.gz *
-        	}     
-        	}
-    
-        */      
+       
         
         stage("Publish to Nexus") {
             steps {
