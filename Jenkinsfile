@@ -78,6 +78,8 @@ pipeline {
                         version: pom.version, repository: NEXUS_REPOSITORY,
                         credentialsId: NEXUS_CREDENTIAL_ID,
                             
+
+                  
                             
                         artifacts: [
                             [artifactId: pom.artifactId, classifier: '', file: artifactPath, type: pom.packaging],
