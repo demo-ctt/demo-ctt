@@ -20,7 +20,7 @@ pipeline {
     step{
     	script{
     	 def causes = currentBuild.getBuildCauses()
-                    echo "${causes}"
+                    print "${causes}"
     	}
     }
     
