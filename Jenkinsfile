@@ -15,13 +15,14 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
     }
     
-    
+
     stages {  
         stage("Build DEV") {
             when{ 
                 beforeAgent false
                 expression { ghprbTargetBranch == 'develop' }
                 }
+                
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
