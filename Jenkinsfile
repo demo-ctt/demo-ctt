@@ -26,6 +26,7 @@ pipeline {
     		steps{
     		sh 'printenv'
     		checkout scm 
+    		
     		}
     	}
     
