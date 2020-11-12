@@ -20,7 +20,9 @@ pipeline {
         stage("Build DEV") {
             steps{
             	script{
-            	   if(!(manager.logContains("Started by timer"))){
+                    def causes = currentBuild.getBuildCauses()
+                    echo "${causes}"
+            	   if(!(causes ==))){
             	when{ expression { ghprbTargetBranch == 'develop' } }
 		sh 'printenv'
 
