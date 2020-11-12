@@ -27,9 +27,9 @@ pipeline {
                     echo "entrei POM"
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
-
+        
                     def causes = currentBuild.getBuildCauses()
-                    if(currentBuild.getBuildCauses()[0].shortDescription == "Started by timer"){
+                    if(currentBuild.getBuildCauses().shortDescription == "Started by timer"){
                     echo "aahhahahah"
                     }
 
@@ -65,10 +65,10 @@ pipeline {
             when{
               expression { ghprbTargetBranch == 'SIT' }
             }
-        	script{
+            script{
                 sh "tar chvfz /var/jenkins_home/workspace/Jenkins_Nexus/${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP.tar.gz *
 "
-        	}     
+            }     
          }          
         */
         stage("Publish to Nexus") {
