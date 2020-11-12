@@ -27,8 +27,11 @@ pipeline {
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
+
+
                     if(!(version.contains("-SNAPSHOT"))){
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT" 
+                    
                     } 
                     sh "mvn package -DskipTests=true"
                 }
@@ -39,7 +42,6 @@ pipeline {
         stage("Build SIT") {
             when { triggeredBy 'TimerTrigger' }
             steps {
-
                 script {
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
@@ -79,8 +81,8 @@ pipeline {
                         credentialsId: NEXUS_CREDENTIAL_ID,
                             
 
-                  
-                            
+
+
                         artifacts: [
                             [artifactId: pom.artifactId, classifier: '', file: artifactPath, type: pom.packaging],
                             [artifactId: pom.artifactId, classifier: '', file: "pom.xml", type: "pom"]
