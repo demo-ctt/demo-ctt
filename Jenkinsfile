@@ -19,12 +19,10 @@ pipeline {
     stages {  
         stage("Build DEV") {
             steps{
-            script{(!(manager.logContains("Started by timer")))}
-            }
-            when{ expression { ghprbTargetBranch == 'develop' } }
-            steps {
-                script {
-			sh 'printenv'
+            	script{
+            	(!(manager.logContains("Started by timer")))
+            	when{ expression { ghprbTargetBranch == 'develop' } }
+		sh 'printenv'
 
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
@@ -39,7 +37,8 @@ pipeline {
                     echo "build dev com sucesso"
                 }
             }
-        }
+            }
+        
         
         stage("Build SIT") {
             steps{
@@ -54,12 +53,10 @@ pipeline {
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
                     }
                     sh "mvn package -DskipTests=true"
+                }            
                 }
-            }
          }
         
-        
-        /*
         stage("zip workspace"){
         	script{
                 sh "tar chvfz /var/jenkins_home/workspace/Jenkins_Nexus/${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP.tar.gz *
