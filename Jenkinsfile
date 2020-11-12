@@ -28,7 +28,10 @@ pipeline {
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
 
-
+                    def causes = currentBuild.getBuildCauses()
+                    print "${causes}"
+                    def specificCause = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
+                     print "${especificCause}"
                     
                     if(!(version.contains("-SNAPSHOT"))){
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT" 
@@ -44,8 +47,6 @@ pipeline {
         stage("Build SIT") {
             steps {
                 script {
-                    def causes = currentBuild.getBuildCauses()
-                    sh "print "${causes}""
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
@@ -81,9 +82,6 @@ pipeline {
                         nexusUrl: NEXUS_URL, groupId: pom.groupId,
                         version: pom.version, repository: NEXUS_REPOSITORY,
                         credentialsId: NEXUS_CREDENTIAL_ID,
-                            
-
-
 
                         artifacts: [
                             [artifactId: pom.artifactId, classifier: '', file: artifactPath, type: pom.packaging],
