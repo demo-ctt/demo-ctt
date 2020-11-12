@@ -18,10 +18,14 @@ pipeline {
 
     stages {  
     
+    	
+    
+    
     
     	stage("teste"){
     		steps{
     		sh 'printenv'
+    		checkout scm 
     		}
     	}
     
