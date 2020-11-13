@@ -17,6 +17,32 @@ pipeline {
     
 
     stages {  
+    
+       stage("Build SIT") {
+            steps {
+                script {
+                def causes = currentBuild.getBuildCauses()
+                if(causes.shortDescription == "Started by timer")
+                    def pom = readMavenPom file: "pom.xml"
+                    def version = "${pom.version}"
+                    
+                    if((version.contains("-SNAPSHOT"))){
+                    	echo "contem snap"
+                        sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
+                    }else{
+                    	echo "nao contem snap"
+                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
+                        
+                    }
+                    sh "mvn package -DskipTests=true"
+                
+                }
+            }
+        }  
+    
+    
+   
+    
         stage("Build DEV") {
             //when{ 
               //  expression { ghprbTargetBranch == 'develop' }
@@ -38,27 +64,7 @@ pipeline {
         }
         
 
-        stage("Build SIT") {
-            steps {
-                script {
-                def causes = currentBuild.getBuildCauses()
-                if(causes.shortDescription == "Started by timer")
-                    def pom = readMavenPom file: "pom.xml"
-                    def version = "${pom.version}"
-                    
-                    if((version.contains("-SNAPSHOT"))){
-                    	echo "contem snap"
-                        sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
-                    }else{
-                    	echo "nao contem snap"
-                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
-                        
-                    }
-                    sh "mvn package -DskipTests=true"
-                
-                }
-            }
-        }  
+     
         stage("Publish to Nexus") {
             steps {
                 script {
