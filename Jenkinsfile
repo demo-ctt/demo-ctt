@@ -26,13 +26,7 @@ pipeline {
                     echo "entrei POM"
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
-        
-                    def causes = currentBuild.getBuildCauses()
-                    if(currentBuild.getBuildCauses().shortDescription == "Started by timer"){
-                    echo "aahhahahah"
-                    }
-
-                    
+                           
                     if(!(version.contains("-SNAPSHOT"))){
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT" 
                         echo "contem snapshot"
@@ -45,7 +39,7 @@ pipeline {
         
 
         stage("Build SIT") {
-        when { triggeredBy 'TimerTrigger' }
+        //when { triggeredBy 'TimerTrigger' }
             steps {
                 script {
                     def pom = readMavenPom file: "pom.xml"
