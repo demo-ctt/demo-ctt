@@ -1,5 +1,5 @@
 pipeline {
-    triggers { cron('*/11 * * * 1-5') }       
+    triggers { cron('*/2 * * * 1-5') }       
     
     agent {
             label 'master'
@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                 def cause=currentBuild.getBuildCauses()[0].shortDescription
-                if(cause.contains('Timer')){
+                if(cause.contains('Started by timer')){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
