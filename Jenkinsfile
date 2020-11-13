@@ -1,5 +1,5 @@
 pipeline {
-    triggers { cron('*/10 * * * 1-5') }       
+    triggers { cron('*/2 * * * 1-5') }       
     
     agent {
             label 'master'
@@ -17,7 +17,6 @@ pipeline {
     
 
     stages {  
-    /*
        stage("Build SIT") {
             steps {
                 script {
@@ -37,13 +36,15 @@ pipeline {
                     sh "mvn package -DskipTests=true"
                 }
                 }
+                
             }
         }  
-    	*/
+    	
     
    
-    	
+    	/*
         stage("Build DEV") {
+        
 		when{ 
          	  expression { ghprbTargetBranch == 'develop' }
             	}
@@ -62,7 +63,7 @@ pipeline {
                 }
             }
         }
-        
+        	*/
 
      
         stage("Publish to Nexus") {
