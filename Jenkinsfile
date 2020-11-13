@@ -39,9 +39,9 @@ pipeline {
         
 
         stage("Build SIT") {
-        //when { triggeredBy 'TimerTrigger' }
             steps {
                 script {
+                if(${currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause')})
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
