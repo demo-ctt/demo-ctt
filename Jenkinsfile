@@ -17,7 +17,6 @@ pipeline {
     
 
     stages {  
-    /*
        stage("Build SIT") {
             steps {
                 script {
@@ -40,11 +39,12 @@ pipeline {
                 
             }
         }  
-    	*/
+    	
     
    
     	
         stage("Build DEV") {
+        /*
 		when{ 
          	  expression { ghprbTargetBranch == 'develop' }
             	}
@@ -63,7 +63,7 @@ pipeline {
                 }
             }
         }
-        
+        	*/
 
      
         stage("Publish to Nexus") {
