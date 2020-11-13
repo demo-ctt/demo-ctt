@@ -21,7 +21,7 @@ pipeline {
        stage("Build SIT") {
             steps {
                 script {
-                def cause=currentBuild.rawBuild.getCauses()
+                def cause=currentBuild.getCauses()
                 if(cause.contains('Timer'))
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
