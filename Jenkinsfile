@@ -42,9 +42,9 @@ pipeline {
     	
     
    
-    	
+    	/*
         stage("Build DEV") {
-        /*
+        
 		when{ 
          	  expression { ghprbTargetBranch == 'develop' }
             	}
