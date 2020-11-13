@@ -1,5 +1,5 @@
 pipeline {
-    triggers { cron('*/2 * * * 1-5') }       
+    triggers { cron('*/10 * * * 1-5') }       
     
     agent {
             label 'master'
@@ -17,7 +17,7 @@ pipeline {
     
 
     stages {  
-    
+    /*
        stage("Build SIT") {
             steps {
                 script {
@@ -39,10 +39,10 @@ pipeline {
                 }
             }
         }  
-    
+    	*/
     
    
-    
+    	
         stage("Build DEV") {
 		when{ 
          	  expression { ghprbTargetBranch == 'develop' }
