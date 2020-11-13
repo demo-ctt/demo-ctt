@@ -1,5 +1,5 @@
 pipeline {
-    triggers { cron('*/11 * * * 1-5') }       
+    triggers { cron('*/10 * * * 1-5') }       
     
     agent {
             label 'master'
@@ -17,10 +17,36 @@ pipeline {
     
 
     stages {  
+    /*
+       stage("Build SIT") {
+            steps {
+                script {
+                def cause=currentBuild.getBuildCauses()[0].shortDescription
+                if(cause.contains('Started by timer')){
+                    def pom = readMavenPom file: "pom.xml"
+                    def version = "${pom.version}"
+                    
+                    if((version.contains("-SNAPSHOT"))){
+                    	echo "contem snap"
+                        sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
+                    }else{
+                    	echo "nao contem snap"
+                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
+                        
+                    }
+                    sh "mvn package -DskipTests=true"
+                }
+                }
+            }
+        }  
+    	*/
+    
+   
+    	
         stage("Build DEV") {
-            //when{ 
-              //  expression { ghprbTargetBranch == 'develop' }
-                //}
+		when{ 
+         	  expression { ghprbTargetBranch == 'develop' }
+            	}
             steps {
                 script {
                     echo "entrei POM"
@@ -28,8 +54,8 @@ pipeline {
                     def version = "${pom.version}"
                            
                     if(!(version.contains("-SNAPSHOT"))){
-                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT" 
-                        echo "contem snapshot"
+                    	echo "nao contem snapshot"
+                       sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
                     } 
                     sh "mvn package -DskipTests=true"
                     echo "build dev com sucesso"
@@ -38,22 +64,7 @@ pipeline {
         }
         
 
-        stage("Build SIT") {
-        //when { triggeredBy 'TimerTrigger' }
-            steps {
-                script {
-                    def pom = readMavenPom file: "pom.xml"
-                    def version = "${pom.version}"
-                    
-                    if((version.contains("-SNAPSHOT"))){
-                        sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"
-                    }else{
-                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
-                    }
-                    sh "mvn package -DskipTests=true"
-                }
-            }
-        }  
+     
         stage("Publish to Nexus") {
             steps {
                 script {
