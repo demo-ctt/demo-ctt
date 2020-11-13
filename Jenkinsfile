@@ -21,8 +21,8 @@ pipeline {
        stage("Build SIT") {
             steps {
                 script {
-                def cause=currentBuild.getBuildCauses()
-                if(cause.contains('Timer'))
+                def cause=currentBuild.getBuildCauses()[0].shortDescription
+                if(cause.contains('Timer')){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
@@ -35,7 +35,7 @@ pipeline {
                         
                     }
                     sh "mvn package -DskipTests=true"
-                
+                }
                 }
             }
         }  
