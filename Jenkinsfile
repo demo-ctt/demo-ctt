@@ -28,8 +28,8 @@ pipeline {
                     def version = "${pom.version}"
                            
                     if(!(version.contains("-SNAPSHOT"))){
-                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT" 
-                        echo "contem snapshot"
+                    	echo "nao contem snapshot"
+                       sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
                     } 
                     sh "mvn package -DskipTests=true"
                     echo "build dev com sucesso"
@@ -46,9 +46,12 @@ pipeline {
                     def version = "${pom.version}"
                     
                     if((version.contains("-SNAPSHOT"))){
-                        sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"
+                    	echo "contem snap"
+                        sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
                     }else{
+                    	echo "nao contem snap"
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
+                        
                     }
                     sh "mvn package -DskipTests=true"
                 }
