@@ -41,7 +41,8 @@ pipeline {
         stage("Build SIT") {
             steps {
                 script {
-                if(currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause'))
+                def causes = currentBuild.getBuildCauses()
+                if(causes.shortDescription == "Started by timer""){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
@@ -54,6 +55,7 @@ pipeline {
                         
                     }
                     sh "mvn package -DskipTests=true"
+                }
                 }
             }
         }  
