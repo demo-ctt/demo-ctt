@@ -44,9 +44,9 @@ pipeline {
    
     
         stage("Build DEV") {
-            //when{ 
-              //  expression { ghprbTargetBranch == 'develop' }
-                //}
+		when{ 
+         	  expression { ghprbTargetBranch == 'develop' }
+            	}
             steps {
                 script {
                     echo "entrei POM"
