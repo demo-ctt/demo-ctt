@@ -45,7 +45,7 @@ pipeline {
         stage("Build DEV") {       
             steps {
                 script {
-                if(ghprbTargetBranch == 'develop' || GIT_BRANCH = ""){
+                if(ghprbTargetBranch == 'develop' || GIT_BRANCH == ""){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
