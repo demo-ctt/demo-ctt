@@ -13,7 +13,7 @@ pipeline {
         NEXUS_URL = "172.17.0.1:8081"
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
-        GIT_BRANCH = ""
+        ghprbTargetBranch = ""
     }
     
 
@@ -34,7 +34,7 @@ pipeline {
                     }
                     sh "mvn package -DskipTests=true"
                 }
-                GIT_BRANCH = "SIT"
+                ghprbTargetBranch = 'develop'
                 }
                 
             }
@@ -45,7 +45,7 @@ pipeline {
         stage("Build DEV") {       
             steps {
                 script {
-                if(ghprbTargetBranch == 'develop' || GIT_BRANCH == ""){
+                if(ghprbTargetBranch == 'develop'){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                            
