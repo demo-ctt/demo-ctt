@@ -13,7 +13,7 @@ pipeline {
         NEXUS_URL = "172.17.0.1:8081"
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
-        ghprbTargetBranch = ""
+        ghprbTargetBranch
     }
     
 
