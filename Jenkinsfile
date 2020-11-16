@@ -1,4 +1,5 @@
 pipeline {
+    /*Trigger SIT corre (1x/dia) as (10 da noite) de (segunda a sexta)*/
     triggers { cron('0 22 * * 1-5') }       
     
     agent {
@@ -13,7 +14,9 @@ pipeline {
         NEXUS_URL = "172.17.0.1:8081"
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
-        ghprbTargetBranch = "develop"
+        /*Workaround para build DEV
+        Quando a build vem de timer, o job nao reconhece a var(var default de pull request(GITHUB))*/
+        ghprbTargetBranch = "develop"	 
     }
     
 
@@ -21,18 +24,22 @@ pipeline {
        stage("Build SIT") {
             steps {
                 script {
+                /*verifica causa da build, se for timer executa.*/
                 def cause=currentBuild.getBuildCauses()[0].shortDescription
                 if(cause.contains('Started by timer')){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
                     if((version.contains("-SNAPSHOT"))){
+                   	 /*adiciona á versao do (pom) + (data atual da build)*/
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
                     }else{
+                    	/*adiciona á versao do (pom) + (-snapshot) + (data atual da build).*/
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
                         
                     }
                     sh "mvn package -DskipTests=true"
+                    /*variavel = "SIT" para que DEV execute.*/
                     ghprbTargetBranch = 'SIT'
                 }               
                 }   
@@ -43,11 +50,14 @@ pipeline {
         stage("Build DEV") {       
             steps {
                 script {
+                /*Verifica se o pull request foi feito para a branch develop
+                Var originada do pull request. O valor é redefinido nas variaveis de ambiente.*/ 	
                 if(ghprbTargetBranch == 'develop'){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                            
                     if(!(version.contains("-SNAPSHOT"))){
+                    /*adiciona a versao do pom com -snapshot.*/
                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
                     } 
                     sh "mvn package -DskipTests=true"
@@ -55,7 +65,26 @@ pipeline {
             	}
             }
         }
-        
+        /*
+         stage("Build Qualidade") {       
+            steps {
+                script {
+                //FLAG???
+                if(ghprbTargetBranch == 'develop'){
+                    def pom = readMavenPom file: "pom.xml"
+                    def version = "${pom.version}"
+                           
+                    if((version.contains("-SNAPSHOT-${BUILD_TIMESTAMP}"))){
+                        sh "mvn -q versions:set -DnewVersion=${pom.version}"  
+                    }else if((version.contains("-SNAPSHOT"))){
+                        sh "mvn -q versions:set -DnewVersion=${pom.version}"           
+                    }
+                    sh "mvn package -DskipTests=true"
+                }
+            	}
+            }
+        }
+        */
 
      
         stage("Publish to Nexus") {
