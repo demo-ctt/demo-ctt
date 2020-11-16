@@ -13,6 +13,7 @@ pipeline {
         NEXUS_URL = "172.17.0.1:8081"
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
+        GIT_BRANCH = ""
     }
     
 
@@ -21,7 +22,6 @@ pipeline {
             steps {
                 script {
                 def cause=currentBuild.getBuildCauses()[0].shortDescription
-                sh 'print ${cause}'
                 if(cause.contains('Started by timer')){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
@@ -39,16 +39,15 @@ pipeline {
                 }
                 
             }
+            GIT_BRANCH = "SIT"
         }  
     	
     
   
         stage("Build DEV") {       
-		when{ 
-         	  expression { ghprbTargetBranch == 'develop' }
-            	}
             steps {
                 script {
+                if(ghprbTargetBranch == 'develop'){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
@@ -62,6 +61,7 @@ pipeline {
                     sh "mvn package -DskipTests=true"
                     echo "build dev com sucesso"
                 }
+            }
             }
         }
         
