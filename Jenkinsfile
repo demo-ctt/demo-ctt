@@ -53,7 +53,7 @@ pipeline {
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
-                    def cause=currentBuild.getBuildCauses()[0].shortDescription
+                    def cause=currentBuild.getBuildCauses()
 			sh 'print ${cause}'
                            
                     if(!(version.contains("-SNAPSHOT"))){
