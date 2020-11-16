@@ -1,5 +1,5 @@
 pipeline {
-    triggers { cron('*/2 * * * 1-5') }       
+    triggers { cron('0 22 * * 1-5') }       
     
     agent {
             label 'master'
@@ -13,6 +13,7 @@ pipeline {
         NEXUS_URL = "172.17.0.1:8081"
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
+        ghprbTargetBranch = "develop"
     }
     
 
@@ -26,44 +27,35 @@ pipeline {
                     def version = "${pom.version}"
                     
                     if((version.contains("-SNAPSHOT"))){
-                    	echo "contem snap"
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
                     }else{
-                    	echo "nao contem snap"
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
                         
                     }
                     sh "mvn package -DskipTests=true"
-                }
-                }
-                
+                    ghprbTargetBranch = 'SIT'
+                }               
+                }   
             }
         }  
     	
     
-   
-    	/*
-        stage("Build DEV") {
-        
-		when{ 
-         	  expression { ghprbTargetBranch == 'develop' }
-            	}
+        stage("Build DEV") {       
             steps {
                 script {
-                    echo "entrei POM"
+                if(ghprbTargetBranch == 'develop'){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                            
                     if(!(version.contains("-SNAPSHOT"))){
-                    	echo "nao contem snapshot"
                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
                     } 
                     sh "mvn package -DskipTests=true"
-                    echo "build dev com sucesso"
                 }
+            	}
             }
         }
-        	*/
+        
 
      
         stage("Publish to Nexus") {
