@@ -33,10 +33,9 @@ pipeline {
                         
                     }
                     sh "mvn package -DskipTests=true"
-                }
-                ghprbTargetBranch = 'SIT'
-                }
-                
+                    ghprbTargetBranch = 'SIT'
+                }               
+                }   
             }
         }  
     	
@@ -53,7 +52,7 @@ pipeline {
                     } 
                     sh "mvn package -DskipTests=true"
                 }
-            }
+            	}
             }
         }
         
