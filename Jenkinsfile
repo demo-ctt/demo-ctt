@@ -65,27 +65,6 @@ pipeline {
             }
         }
         
-         stage("Build DEV") {       
-		when{ 
-         	  expression { ghprbTargetBranch == 'develop' }
-            	}
-            steps {
-                script {
-                    def pom = readMavenPom file: "pom.xml"
-                    def version = "${pom.version}"
-                    
-                    def cause=currentBuild.getBuildCauses()
-			print "${cause}"
-                           
-                           
-                    if(!(version.contains("-SNAPSHOT"))){
-                       sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
-                    } 
-                    sh "mvn package -DskipTests=true"
-                    echo "build dev com sucesso"
-                }
-            }
-        }
 
      
         stage("Publish to Nexus") {
