@@ -27,19 +27,17 @@ pipeline {
                     def version = "${pom.version}"
                     
                     if((version.contains("-SNAPSHOT"))){
-                    	echo "contem snap"
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
                     }else{
-                    	echo "nao contem snap"
                         sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"
                         
                     }
                     sh "mvn package -DskipTests=true"
                 }
+                GIT_BRANCH = "SIT"
                 }
                 
             }
-            GIT_BRANCH = "SIT"
         }  
     	
     
@@ -47,7 +45,7 @@ pipeline {
         stage("Build DEV") {       
             steps {
                 script {
-                if(ghprbTargetBranch == 'develop'){
+                if(ghprbTargetBranch == 'develop' || GIT_BRANCH = ""){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
                     
@@ -73,9 +71,6 @@ pipeline {
                     def pom = readMavenPom file: "pom.xml";
                     def artifactName = "${pom.artifactId}.${pom.packaging}"
                     def artifactPath = "target/${artifactName}"
-
-			def cause=currentBuild.getBuildCauses()[0].shortDescription
-			print "${cause}"
 
                     nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION, protocol: NEXUS_PROTOCOL,
