@@ -54,7 +54,8 @@ pipeline {
                     def version = "${pom.version}"
                     
                     def cause=currentBuild.getBuildCauses()
-			sh 'print ${cause}'
+			print ${cause}
+                           
                            
                     if(!(version.contains("-SNAPSHOT"))){
                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
@@ -74,7 +75,7 @@ pipeline {
                     def artifactPath = "target/${artifactName}"
 
 			def cause=currentBuild.getBuildCauses()[0].shortDescription
-			sh 'print ${cause}'
+			print ${cause}
 
                     nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION, protocol: NEXUS_PROTOCOL,
