@@ -34,7 +34,7 @@ pipeline {
                     }
                     sh "mvn package -DskipTests=true"
                 }
-                ghprbTargetBranch = 'develop'
+                ghprbTargetBranch = 'sit'
                 }
                 
             }
@@ -53,7 +53,6 @@ pipeline {
                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
                     } 
                     sh "mvn package -DskipTests=true"
-                    echo "build dev com sucesso"
                 }
             }
             }
