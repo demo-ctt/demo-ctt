@@ -21,6 +21,7 @@ pipeline {
             steps {
                 script {
                 def cause=currentBuild.getBuildCauses()[0].shortDescription
+                sh 'print ${cause}'
                 if(cause.contains('Started by timer')){
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
@@ -41,8 +42,7 @@ pipeline {
         }  
     	
     
-   
-    	/*
+  
         stage("Build DEV") {
         
 		when{ 
@@ -50,12 +50,13 @@ pipeline {
             	}
             steps {
                 script {
-                    echo "entrei POM"
                     def pom = readMavenPom file: "pom.xml"
                     def version = "${pom.version}"
+                    
+                    def cause=currentBuild.getBuildCauses()[0].shortDescription
+			sh 'print ${cause}'
                            
                     if(!(version.contains("-SNAPSHOT"))){
-                    	echo "nao contem snapshot"
                        sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"                    
                     } 
                     sh "mvn package -DskipTests=true"
@@ -63,7 +64,6 @@ pipeline {
                 }
             }
         }
-        	*/
 
      
         stage("Publish to Nexus") {
@@ -72,6 +72,9 @@ pipeline {
                     def pom = readMavenPom file: "pom.xml";
                     def artifactName = "${pom.artifactId}.${pom.packaging}"
                     def artifactPath = "target/${artifactName}"
+
+			def cause=currentBuild.getBuildCauses()[0].shortDescription
+			sh 'print ${cause}'
 
                     nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION, protocol: NEXUS_PROTOCOL,
