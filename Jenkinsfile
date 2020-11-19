@@ -19,22 +19,21 @@ pipeline {
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
     }
-    
     stages {  
         stage("Setup env"){
             steps{
                 script{
                     def cause=currentBuild.getBuildCauses()[0].shortDescription   //VERIFICA SE A CAUSA DA BUILD FOI DE TIMER
                     if(!(cause.contains(TIMER))){
-                        switch (ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
-                            case 'develop'
+                        switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
+                            case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
                                 break
-                            case 'Qualidade'
-                                GLOBAL_ENVIRONMENT = 'Qualidade'
+                            case 'qualidade':
+                                GLOBAL_ENVIRONMENT = 'qualidade'
                                 break
-                            case 'master'
-                                GLOBAL_ENVIRONMENT = 'Producao'
+                            case 'master':
+                                GLOBAL_ENVIRONMENT = 'producao'
                                 break
                             default:
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
@@ -83,7 +82,7 @@ pipeline {
          stage("Qualidade Artifact") {       
             steps {
                 script {
-                    if(GLOBAL_ENVIRONMENT == 'Qualidade'){      //QUALIDADE
+                    if(GLOBAL_ENVIRONMENT == 'qualidade'){      //QUALIDADE
                         def pom = readMavenPom file: "pom.xml"  //LE POM
                         def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)
                            
