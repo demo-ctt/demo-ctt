@@ -2,30 +2,32 @@ pipeline {
     /*Trigger SIT corre (1x/dia) as (10 da noite) de (segunda a sexta)*/
     triggers { cron('0 22 * * 1-5') }       
     
-    agent {
-            label 'master'
-    }
+    agent { label 'master' }
     
     tools { maven "Maven" }
     
+    options{
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "172.17.0.1:8081"
         NEXUS_REPOSITORY = "maven-nexus-repo"
-        NEXUS_CREDENTIAL_ID = "nexus-credentials"
-        /*Workaround para build DEV -Quando a build vem de timer, o job nao reconhece a var(var default de pull request(GITHUB))*/
-        GLOBAL_ENVIRONMENT = ""	 
+        NEXUS_CREDENTIAL_ID = "nexus-credentials" 
+        GLOBAL_ENVIRONMENT = "NO BRANCH"	 
         TIMER = "Started by timer"
     }
     
     stages {  
-        stage("Entry point"){
+        stage("Setup env"){
             steps{
                 script{
                     def cause=currentBuild.getBuildCauses()[0].shortDescription       /*verifica causa da build, se for timer executa.*/
                     if(!(cause.contains(TIMER))){
-                        switch (ghprbTargetBranch){     /*Var originada do pull request.*/ 
+                        switch (ghprbTargetBranch){     /*Var originada do pull request. Determina se é DEV, SIT, QUA ou PROD */ 
                             case: 'develop'
                                 GLOBAL_ENVIRONMENT = 'develop'
                                 break
@@ -36,7 +38,7 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = 'Producao'
                                 break
                             default:
-                                GLOBAL_ENVIRONMENT = "NO STAGE"
+                                GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
                     }else{
@@ -64,8 +66,7 @@ pipeline {
                 }
             }
        }  
-    	
-    
+    	    
         stage("DEV Artifact") {       
             steps {
                 script {                                                                                              	
@@ -77,7 +78,7 @@ pipeline {
                             sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"         /*adiciona a versao do pom com -snapshot.*/             
                         } 
                     sh "mvn package -DskipTests=true"
-                }
+                    }
             	}
             }
         }
@@ -120,7 +121,6 @@ pipeline {
                             [artifactId: pom.artifactId, classifier: '', file: "pom.xml", type: "pom"]
                         ]
                     );
-                }
                 }
             }
         }
