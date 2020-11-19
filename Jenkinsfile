@@ -18,19 +18,16 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-credentials" 
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
-        ADMIN = "Started by user Admin"
+        ADMIN = "Started by user"
     }
   
     stages {  
         stage("Setup env"){
             steps{
-                script{
-                    def cause=currentBuild.getBuildCauses()[0].shortDescription   //VERIFICA SE A CAUSA DA BUILD FOI DE TIMER
-                    //echo "${cause}"
-                    //echo "${cause2}"
-                    // sh 'printenv'
-                    //echo "${currentBuild.buildCauses}" 
-                    if(!(cause.contains(TIMER)) || !(cause.contains(ADMIN))){
+                script{ 
+                    def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
+                    def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
+                    if(!(timercause || admincause)){
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
@@ -45,13 +42,13 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else if((cause.contains(TIMER))){
-                        sh "git checkout develop"
+                    }else if(admincause || timercause){
                         GLOBAL_ENVIRONMENT = 'SIT'
-                    }else if((cause.contains(ADMIN))){
                         sh "git checkout develop"
-                        GLOBAL_ENVIRONMENT = 'SIT'
+                    }else{
+                        echo "Alguma coisa correu mal."
                     }
+                    
                 }
             }
         }
