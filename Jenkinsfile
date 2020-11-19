@@ -64,15 +64,13 @@ pipeline {
                 }
             }
        }  
-    
-    	    
+	    
         stage("DEV Artifact") {       
             steps {
                 script {                                                                                              	
                     if(GLOBAL_ENVIRONMENT == 'develop'){     
                         def pom = readMavenPom file: "pom.xml"     //LE
-                        def version = "${pom.version}"             //APENAS A VERSAO(Ex:1.2)
-                           
+                        def version = "${pom.version}"             //APENAS A VERSAO(Ex:1.2)                 
                         if(!(version.contains("-SNAPSHOT"))){           //CASO CONTENHA (-SNAPSHOT)                                                                                 
                             sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"    //VERSAO COM SNAPSHOT (MAVEN)            
                         } 
