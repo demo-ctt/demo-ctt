@@ -19,13 +19,12 @@ pipeline {
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
         ADMIN = "Started by user"
     }
-
+  
     stages {  
         stage("Setup env"){
             steps{
                 script{ 
                     echo "SETUP ENVIRONMENT"
-
                     def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
                     def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
                     if(!(timercause || admincause)){
@@ -46,14 +45,10 @@ pipeline {
                     }else if(admincause || timercause){
                         GLOBAL_ENVIRONMENT = 'SIT'
                         sh "git checkout develop"
-
                         echo "GOES TO SIT"
                     }else{
                         echo "Unexpected error"
                         GLOBAL_ENVIRONMENT = "NO BRANCH"
-
-                    }else{
-                        echo "Alguma coisa correu mal."
                     }
                     
                 }
@@ -113,15 +108,10 @@ pipeline {
                     }   
                     //INCREMENTO DE MINOR VERSION
                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
-                        }
-                    sh "mvn package -DskipTests=true" 
-                    }   
-                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
                 }
             }
         }
         
-
         /*
         stage("Producao Artifact") {       
             steps {
@@ -133,7 +123,6 @@ pipeline {
             }
         }
         */
-
 
         stage("Nexus Repository") {
             steps { 
