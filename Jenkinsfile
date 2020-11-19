@@ -25,7 +25,6 @@ pipeline {
             steps{
                 script{ 
                     echo "SETUP ENVIRONMENT"
-
                     def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
                     def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
                     if(!(timercause || admincause)){
@@ -113,6 +112,7 @@ pipeline {
                     }   
                     //INCREMENTO DE MINOR VERSION
                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
+                        }
                         }
                     sh "mvn package -DskipTests=true" 
                     }   
