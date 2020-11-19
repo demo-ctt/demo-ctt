@@ -7,6 +7,7 @@ pipeline {
     
     options{
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
+       
         disableConcurrentBuilds()                                                       //SEM BUILDS SIMULTANEAS
     }
 
@@ -19,6 +20,7 @@ pipeline {
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
     }
+
     stages {  
         stage("Setup env"){
             steps{
@@ -45,6 +47,7 @@ pipeline {
                 }
             }
         }
+
        stage("SIT Artifact") {
             steps {
                 script {                                                                                                     
