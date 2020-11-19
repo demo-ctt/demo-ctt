@@ -30,7 +30,7 @@ pipeline {
                     //echo "${cause2}"
                     // sh 'printenv'
                     //echo "${currentBuild.buildCauses}" 
-                    if(!(cause.contains(TIMER)) || !(cause.contains(ADMIN))){
+                    if(!(cause.contains(TIMER) || cause.contains(ADMIN))){
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
@@ -45,7 +45,7 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else{
+                    }else if((cause.contains(TIMER) || cause.contains(ADMIN))){
                         sh "git checkout DEV"
                         GLOBAL_ENVIRONMENT = 'SIT'
                     }
