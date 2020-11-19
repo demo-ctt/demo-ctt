@@ -91,9 +91,11 @@ pipeline {
                             //INCREMENTAR VERSAO
                             sh "mvn -q versions:set -DnewVersion=${pom.version}"    //VERSAO SEM SNAPSHOT(MAVEN)
                         }else if((version.contains("-SNAPSHOT"))){
-                            sh "mvn -q versions:set -DnewVersion=${pom.version}"    //VERSAO SEM SNAPSHOT(MAVEN)     
+                            sh "mvn -q versions:set -DnewVersion=${pom.version}"    //VERSAO SEM SNAPSHOT(MAVEN)  
+                            sh "mvn -q versions:use-next-versions"   
                         }
-                    sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN)
+                    sh "mvn -q versions:use-next-versions" 
+                   // sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN)
                     }
             	}
             }
