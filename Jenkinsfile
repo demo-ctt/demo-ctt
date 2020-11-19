@@ -29,7 +29,7 @@ pipeline {
                     def cause2=currentBuild.getBuildCauses()
                      
                     echo "${cause}"
-                    echo "${caus2}"
+                    echo "${cause2}"
                     sh 'printenv'
                     echo "${currentBuild.buildCauses}" 
                     if(!(cause.contains(TIMER)) || !(cause.contains(ADMIN))){
