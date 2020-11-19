@@ -50,7 +50,7 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-credentials" 
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
-        ADMIN = "Admin"
+        ADMIN = "Started by user Admin"
     }
   
     stages {  
@@ -58,11 +58,11 @@ pipeline {
             steps{
                 script{
                     def cause=currentBuild.getBuildCauses()[0].shortDescription   //VERIFICA SE A CAUSA DA BUILD FOI DE TIMER
-                    def cause2=currentBuild.getBuildCauses()
+                   // def cause2=currentBuild.getBuildCauses()
                      
-                    echo "${cause}"
-                    echo "${cause2}"
-                    sh 'printenv'
+                    //echo "${cause}"
+                    //echo "${cause2}"
+                   // sh 'printenv'
                     echo "${currentBuild.buildCauses}" 
                     if(!(cause.contains(TIMER)) || !(cause.contains(ADMIN))){
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
