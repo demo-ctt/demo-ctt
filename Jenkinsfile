@@ -32,7 +32,7 @@ pipeline {
                     //echo "${currentBuild.buildCauses}" 
                     def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
                     def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
-                    if(!(timercause) || !(admincause)){
+                    if(!(timercause || admincause)){
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
