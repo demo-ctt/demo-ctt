@@ -123,11 +123,10 @@ pipeline {
             }
         }
         */
-
         stage("Nexus Repository") {
             steps { 
                 script {
-                    if(GLOBAL_ENVIRONMENT =! "NO BRANCH"){
+                    if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
                         echo "INSIDE NEXUS PUBLISHER"
                         def pom = readMavenPom file: "pom.xml";     //LE POM
                         def artifactName = "${pom.artifactId}.${pom.packaging}" //NOME DO ARTEFACTO
