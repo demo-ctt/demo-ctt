@@ -30,7 +30,7 @@ pipeline {
                     //echo "${cause2}"
                     // sh 'printenv'
                     //echo "${currentBuild.buildCauses}" 
-                    if(!(cause.contains(ADMIN)) || !(cause.contains(TIMER))){
+                    if(!(cause.contains(ADMIN) || !(cause.contains(TIMER)))){
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
