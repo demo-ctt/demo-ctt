@@ -18,6 +18,7 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-credentials" 
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
+        ADMIN = "Started by user"
     }
   
     stages {  
@@ -40,7 +41,8 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else{
+                    }else if((cause.contains(TIMER) || (cause.contains(ADMIN)){
+                        sh "git checkout SIT"
                         GLOBAL_ENVIRONMENT = 'SIT'
                     }
                 }
@@ -86,20 +88,16 @@ pipeline {
                     if(GLOBAL_ENVIRONMENT == 'qualidade'){      //QUALIDADE
                         def pom = readMavenPom file: "pom.xml"  //LE POM
                         def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)     
-                        if((version.contains("-SNAPSHOT-${BUILD_TIMESTAMP}"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
-                            //OU USAR MVN RELEASE???????
-                            //INCREMENTAR VERSAO
+                        if((version.contains("-SNAPSHOT"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
                             sh "mvn -q versions:set -DnewVersion=${pom.version}"    //VERSAO SEM SNAPSHOT(MAVEN)
-                        }else if((version.contains("-SNAPSHOT"))){
-                            sh "mvn -q versions:set -DnewVersion=${pom.version}"    //VERSAO SEM SNAPSHOT(MAVEN)  
-                            sh "maven -q versions:use-next-versions"   
                         }
-                     sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
-                     sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN)
-                    }
-            	}
+                    sh "mvn package -DskipTests=true" 
+                    }   
+                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
+                }
             }
         }
+        
         
         stage("Nexus Repository") {
             steps { 
