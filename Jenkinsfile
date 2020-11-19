@@ -19,7 +19,6 @@ pipeline {
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
     }
-    
     stages {  
         stage("Setup env"){
             steps{
