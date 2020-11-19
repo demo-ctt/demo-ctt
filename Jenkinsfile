@@ -30,7 +30,7 @@ pipeline {
                     //echo "${cause2}"
                     // sh 'printenv'
                     //echo "${currentBuild.buildCauses}" 
-                    if(!(cause.contains(ADMIN))){
+                    if(!(cause.contains(ADMIN)) || !(cause.contains(TIMER))){
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
@@ -48,7 +48,7 @@ pipeline {
                     }else if((cause.contains(ADMIN))){
                         GLOBAL_ENVIRONMENT = 'SIT'
                         sh "git checkout develop"
-                    }else if((cause.contains(ADMIN))){
+                    }else if((cause.contains(TIMER))){
                         sh "git checkout develop"
                         GLOBAL_ENVIRONMENT = 'SIT'
                     }
@@ -77,7 +77,7 @@ pipeline {
         stage("DEV Artifact") {       
             steps {
                 script {                                                                                              	
-                    if(GLOBAL_ENVIRONMENT == 'develop' && GIT_BRANCH == 'develop'){     
+                    if(GLOBAL_ENVIRONMENT == 'develop'){     
                         def pom = readMavenPom file: "pom.xml"     //LE
                         def version = "${pom.version}"             //APENAS A VERSAO(Ex:1.2)                 
                         if(!(version.contains("-SNAPSHOT"))){           //CASO CONTENHA (-SNAPSHOT)                                                                                 
@@ -92,7 +92,7 @@ pipeline {
          stage("Qualidade Artifact") {       
             steps {
                 script {
-                    if(GLOBAL_ENVIRONMENT == 'qualidade' && GIT_BRANCH == 'develop' ){      //QUALIDADE
+                    if(GLOBAL_ENVIRONMENT == 'qualidade'){      //QUALIDADE
                         def pom = readMavenPom file: "pom.xml"  //LE POM
                         def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)     
                         if((version.contains("-SNAPSHOT"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
