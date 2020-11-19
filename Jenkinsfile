@@ -18,7 +18,7 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-credentials" 
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
-        ADMIN = "Started by user"
+        ADMIN = "Admin"
     }
   
     stages {  
@@ -42,7 +42,7 @@ pipeline {
                                 break
                         }
                     }else if((cause.contains(TIMER)) || (cause.contains(ADMIN)) ){
-                        sh "git checkout SIT"
+                        sh "git checkout DEV"
                         GLOBAL_ENVIRONMENT = 'SIT'
                     }else{
                         echo "ERROR"
