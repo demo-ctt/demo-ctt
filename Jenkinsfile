@@ -92,9 +92,9 @@ pipeline {
                             sh "mvn -q versions:set -DnewVersion=${pom.version}"    //VERSAO SEM SNAPSHOT(MAVEN)
                         }else if((version.contains("-SNAPSHOT"))){
                             sh "mvn -q versions:set -DnewVersion=${pom.version}"    //VERSAO SEM SNAPSHOT(MAVEN)  
-                            sh "mvn -q versions:use-next-versions"   
+                            sh "maven -q versions:use-next-versions"   
                         }
-                   sh "mvn build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.nextIncrementalVersion} versions:commit"
+                     sh "mvn build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.nextIncrementalVersion} versions:commit"
                    // sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN)
                     }
             	}
