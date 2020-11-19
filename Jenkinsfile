@@ -27,13 +27,13 @@ pipeline {
                     def cause=currentBuild.getBuildCauses()[0].shortDescription   //VERIFICA SE A CAUSA DA BUILD FOI DE TIMER
                     if(!(cause.contains(TIMER))){
                         switch (ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
-                            case: 'develop'
+                            case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
                                 break
-                            case: 'Qualidade'
-                                GLOBAL_ENVIRONMENT = 'Qualidade'
+                            case 'qualidade':
+                                GLOBAL_ENVIRONMENT = 'qualidade'
                                 break
-                            case: 'master'
+                            case 'master':
                                 GLOBAL_ENVIRONMENT = 'Producao'
                                 break
                             default:
