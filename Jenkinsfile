@@ -85,8 +85,7 @@ pipeline {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'qualidade'){      //QUALIDADE
                         def pom = readMavenPom file: "pom.xml"  //LE POM
-                        def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)
-                           
+                        def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)     
                         if((version.contains("-SNAPSHOT-${BUILD_TIMESTAMP}"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
                             //OU USAR MVN RELEASE???????
                             //INCREMENTAR VERSAO
