@@ -46,7 +46,6 @@ pipeline {
                 }
             }
         }
-
        stage("SIT Artifact") {
             steps {
                 script {                                                                                                     
