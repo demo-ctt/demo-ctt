@@ -44,6 +44,8 @@ pipeline {
                     }else if((cause.contains(TIMER) || (cause.contains(ADMIN)){
                         sh "git checkout SIT"
                         GLOBAL_ENVIRONMENT = 'SIT'
+                    }else{
+                        echo "ERROR"
                     }
                 }
             }
