@@ -24,12 +24,7 @@ pipeline {
     stages {  
         stage("Setup env"){
             steps{
-                script{
-                   // def cause=currentBuild.getBuildCauses()[0].shortDescription   //VERIFICA SE A CAUSA DA BUILD FOI DE TIMER
-                    //echo "${cause}"
-                    //echo "${cause2}"
-                    // sh 'printenv'
-                    //echo "${currentBuild.buildCauses}" 
+                script{ 
                     def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
                     def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
                     if(!(timercause || admincause)){
@@ -47,13 +42,13 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else if(admincause){
+                    }else if(admincause || timercause){
                         GLOBAL_ENVIRONMENT = 'SIT'
                         sh "git checkout develop"
-                    }else if(timercause){
-                        sh "git checkout develop"
-                        GLOBAL_ENVIRONMENT = 'SIT'
+                    }else{
+                        echo "Alguma coisa correu mal."
                     }
+                    
                 }
             }
         }
