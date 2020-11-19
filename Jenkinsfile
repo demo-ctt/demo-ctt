@@ -26,6 +26,7 @@ pipeline {
             steps{
                 script{
                     def cause=currentBuild.getBuildCauses()[0].shortDescription   //VERIFICA SE A CAUSA DA BUILD FOI DE TIMER
+                    sh 'print ${cause}'
                     if(!(cause.contains(TIMER)) || !(cause.contains(ADMIN))){
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
