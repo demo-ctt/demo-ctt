@@ -59,7 +59,7 @@ pipeline {
        stage("SIT Artifact") {
             steps {
                 script {                                                                                                     
-                    if(GLOBAL_ENVIRONMENT == 'SIT' && GIT_BRANCH == 'develop'){
+                    if(GLOBAL_ENVIRONMENT == 'SIT'){
                         def pom = readMavenPom file: "pom.xml"  //LE POM
                         def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)
                     
