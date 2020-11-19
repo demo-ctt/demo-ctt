@@ -101,7 +101,7 @@ pipeline {
                         def pom = readMavenPom file: "pom.xml"  //LE POM
                         def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)     
                         if((version.contains("-SNAPSHOT"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
-                        echo "BUILD"
+                            echo "BUILD"
                          sh 'mvn validate -Pdrop-snapshot'
                           // sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}\' versions:commit'    //VERSAO SEM SNAPSHOT(MAVEN)
                             sh 'mvn versions:use-releases'
