@@ -18,7 +18,7 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexus-credentials" 
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
-        ADMIN = "Started by user Admin"
+        ADMIN = "Started by user"
     }
   
     stages {  
