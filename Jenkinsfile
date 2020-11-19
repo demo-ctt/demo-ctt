@@ -15,41 +15,41 @@ pipeline {
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "nexus-credentials"
         /*Workaround para build DEV -Quando a build vem de timer, o job nao reconhece a var(var default de pull request(GITHUB))*/
-        ghprbTargetBranch = "develop"
-        GLOBAL_ENVIRONMENT = "NO STAGE"	 
+        GLOBAL_ENVIRONMENT = ""	 
         TIMER = "Started by timer"
     }
     
     stages {  
-        stage("PIPELINE ENTRY POINT"){
+        stage("Entry point"){
             steps{
                 script{
-                    switch (env.ghprbTargetBranch){
-                        case: 'develop'
-                            GLOBAL_ENVIRONMENT = 'develop'
-                            break
-                        case: 'SIT'
-                            GLOBAL_ENVIRONMENT = 'SIT'
-                            break
-                        case: 'Qualidade'
-                            GLOBAL_ENVIRONMENT = 'Qualidade'
-                            break
-                        case: 'Producao'
-                            GLOBAL_ENVIRONMENT = 'Producao'
-                            break
-                        default:
-                            GLOBAL_ENVIRONMENT = "NO STAGE"
-                            break
+                    def cause=currentBuild.getBuildCauses()[0].shortDescription       /*verifica causa da build, se for timer executa.*/
+                    if(!(cause.contains(TIMER))){
+                        switch (ghprbTargetBranch){     /*Var originada do pull request.*/ 
+                            case: 'develop'
+                                GLOBAL_ENVIRONMENT = 'develop'
+                                break
+                            case: 'Qualidade'
+                                GLOBAL_ENVIRONMENT = 'Qualidade'
+                                break
+                            case: 'master'
+                                GLOBAL_ENVIRONMENT = 'Producao'
+                                break
+                            default:
+                                GLOBAL_ENVIRONMENT = "NO STAGE"
+                                break
+                        }
+                    }else{
+                        GLOBAL_ENVIRONMENT = 'SIT'
                     }
                 }
             }
         }
 
-       stage("SIT") {
+       stage("SIT Artifact") {
             steps {
                 script {                                                                                                     
-                    def cause=currentBuild.getBuildCauses()[0].shortDescription       /*verifica causa da build, se for timer executa.*/
-                    if(cause.contains(TIMER)){
+                    if(GLOBAL_ENVIRONMENT == 'SIT'){
                         def pom = readMavenPom file: "pom.xml"
                         def version = "${pom.version}"
                     
@@ -66,10 +66,10 @@ pipeline {
        }  
     	
     
-        stage("DEV") {       
+        stage("DEV Artifact") {       
             steps {
                 script {                                                                                              	
-                    if(GLOBAL_ENVIRONMENT == 'develop'){     /*Var originada do pull request. O valor é redefinido nas variaveis de ambiente.*/ 
+                    if(GLOBAL_ENVIRONMENT == 'develop'){     
                         def pom = readMavenPom file: "pom.xml"
                         def version = "${pom.version}"
                            
@@ -82,7 +82,7 @@ pipeline {
             }
         }
         
-         stage("QUA") {       
+         stage("Qualidade Artifact") {       
             steps {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'Qualidade'){
@@ -102,7 +102,7 @@ pipeline {
             }
         }
         
-        stage("Publish Nexus") {
+        stage("Nexus Repository") {
             steps { 
                 script {
                     def pom = readMavenPom file: "pom.xml";
