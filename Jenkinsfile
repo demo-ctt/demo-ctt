@@ -108,14 +108,6 @@ pipeline {
                     }   
                     //INCREMENTO DE MINOR VERSION
                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
-<<<<<<< HEAD
-=======
-                        }
-                        }
-                    sh "mvn package -DskipTests=true" 
-                    }   
-                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
->>>>>>> 969360e1592bba00b231300dcd32502a25b2edb6
                 }
             }
         }
