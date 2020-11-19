@@ -41,9 +41,11 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else if((cause.contains(TIMER) || (cause.contains(ADMIN)){
+                    }else if((cause.contains(TIMER)) || ((cause.contains(ADMIN))){
                         sh "git checkout SIT"
                         GLOBAL_ENVIRONMENT = 'SIT'
+                    }else{
+                        echo "ERROR"
                     }
                 }
             }
