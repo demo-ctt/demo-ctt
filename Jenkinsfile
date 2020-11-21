@@ -48,12 +48,12 @@ pipeline {
                         echo "GOES TO SIT"
                     }else if(admincause){
                         def USER_INPUT = input(
-                            message: '(SIT) ou (Qualidade)?'
+                            message: '(SIT) ou (Qualidade)?',    
                             parameters: [
                                     [$class: 'ChoiseParameterDefinition',
                                     choices: ['SIT','Qualidade'].join('\n'),
                                     name: 'input',
-                                    description: 'Selecione uma opcao de build']
+                                    description: 'Selecione uma opcao de build']    
                             ])
 
                         echo "Foi selecionado build para: ${USER_INPUT}"
