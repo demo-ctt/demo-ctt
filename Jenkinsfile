@@ -42,13 +42,31 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else if(admincause || timercause){
+                    }else if(timercause){
                         GLOBAL_ENVIRONMENT = 'SIT'
                         sh "git checkout develop"
                         echo "GOES TO SIT"
-                    }else{
-                        echo "Unexpected error"
-                        GLOBAL_ENVIRONMENT = "NO BRANCH"
+                    }else if(admincause){
+                        def USER_INPUT = input(
+                            message: '(SIT) ou (Qualidade)?'
+                            parameters: [
+                                    [$class: 'ChoiseParameterDefinition',
+                                    choices: ['SIT','Qualidade'].join('\n'),
+                                    name: 'input',
+                                    description: 'Selecione uma opcao de build']
+                            ])
+
+                        echo "Foi selecionado build para: ${USER_INPUT}"
+
+                        if("${USER_INPUT}" == "SIT"){
+                            GLOBAL_ENVIRONMENT = 'SIT' 
+                            sh "git checkout develop"
+                            echo "GOES TO SIT"                 
+                        }else{
+                            GLOBAL_ENVIRONMENT = 'Qualidade'
+                            sh "git checkout qualidade"
+                            echo "GOES TO Qualidade"
+                        }
                     }
                     
                 }
