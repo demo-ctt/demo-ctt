@@ -49,11 +49,10 @@ pipeline {
                     }else if(admincause){
                         def USER_INPUT = input(
                             message: '(SIT) ou (Qualidade)?',    
-                            parameters: [
-                                    [$class: 'ChoiseParameterDefinition',
-                                    choices: ['SIT','Qualidade'].join('\n'),
-                                    name: 'input',
-                                    description: 'Selecione uma opcao de build']    
+                            properties(
+                                [parameters([choice(choices: ["SIT", "QUALIDADE"].join("\n"),
+                                description: 'Escolha SIT ou QUALIDADE', 
+                                name: 'Escolha uma build.')])]) 
                             ])
 
                         echo "Foi selecionado build para: ${USER_INPUT}"
