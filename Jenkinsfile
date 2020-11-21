@@ -47,12 +47,7 @@ pipeline {
                         sh "git checkout develop"
                         echo "GOES TO SIT"
                     }else if(admincause){
-                        try {
-                            timeout(time: 15, unit: 'MINUTES'){
-                             USER_INPUT  = input( message: 'SIT ou QUALIDADE?', parameters: [choice(choices: ['SIT', 'qualidade'], description: 'Selecione a build que pretende (SIT /QUALIDADE)', name: '')])
-                        }catch(err) {
-                            error 'Build for production aborted'
-                        }
+                        def USER_INPUT  = input( message: 'SIT ou QUALIDADE?', parameters: [choice(choices: ['SIT', 'qualidade'], description: 'Selecione a build que pretende (SIT /QUALIDADE)', name: '')])
                         if("${USER_INPUT}" == "SIT"){
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
