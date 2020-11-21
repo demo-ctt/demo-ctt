@@ -50,7 +50,7 @@ pipeline {
                         try {
                             timeout(time: 15, unit: 'MINUTES'){
                              USER_INPUT  = input( message: 'SIT ou QUALIDADE?', parameters: [choice(choices: ['SIT', 'qualidade'], description: 'Selecione a build que pretende (SIT /QUALIDADE)', name: '')])
-                        } catch (err) {
+                        }catch(err) {
                             error 'Build for production aborted'
                         }
                         if("${USER_INPUT}" == "SIT"){
