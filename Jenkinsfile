@@ -53,7 +53,7 @@ pipeline {
                             sh "git checkout develop"
                             echo "GOES TO SIT"                 
                         }else{
-                            GLOBAL_ENVIRONMENT = 'Qualidade'
+                            GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
                             echo "GOES TO Qualidade"
                         }
