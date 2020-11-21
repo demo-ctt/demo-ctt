@@ -53,7 +53,7 @@ pipeline {
                                 [parameters([choice(choices: ["SIT", "QUALIDADE"].join("\n"),
                                 description: 'Escolha SIT ou QUALIDADE', 
                                 name: 'Escolha uma build.')])]) 
-                            ])
+                            )
 
                         echo "Foi selecionado build para: ${USER_INPUT}"
 
