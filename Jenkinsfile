@@ -7,9 +7,6 @@ pipeline {
     
     options{
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
-    }
-
-    properties{
         parameters([
             booleanParam(name: 'RELEASE', default: false, description: "SOMETHING")
         ])
@@ -123,7 +120,7 @@ pipeline {
                         def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)     
                         if((version.contains("-SNAPSHOT"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
                             echo "BUILD"
-                           sh 'mvn versions:set -DremoveSnapshot'
+                            sh 'mvn versions:set -DremoveSnapshot'
                             //sh 'mvn validate -Pdrop-snapshot'
                             //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}\' versions:commit'    //VERSAO SEM SNAPSHOT(MAVEN)
                             //sh 'mvn versions:use-releases'
@@ -140,18 +137,7 @@ pipeline {
                 }
             }
         }
-        
-        /*
-        stage("Producao") {       
-            steps {
-                script {
-                    if(GLOBAL_ENVIRONMENT == 'producao'){      
-                        echo "INSIDE PRODUCAO"
-                    }   
-                }
-            }
-        }
-        */
+
         stage("Nexus Repository Artifact") {
             steps { 
                 script {
