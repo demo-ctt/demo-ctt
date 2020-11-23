@@ -7,6 +7,12 @@ pipeline {
     
     options{
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
+        office365ConnectorWebhooks([[
+            notifySuccess: true,
+            notifyFailure: true,
+            url: TEAMS_URL
+            ]]
+        )
     }
 
     environment {
@@ -18,6 +24,7 @@ pipeline {
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
         ADMIN = "Started by user"
+        TEAMS_URL = "https://outlook.office.com/webhook/27903f47-1649-4be5-8eec-b00ed76b2b6d@39c83d5e-cede-42d1-962f-c6a853ab7cf5/JenkinsCI/15874adb11b140e6bac8331836b4ad29/9469806e-38aa-43c2-b3d6-086656250e72"
     }
   
     stages {  
@@ -47,7 +54,7 @@ pipeline {
                         sh "git checkout develop"
                         echo "GOES TO SIT"
                     }else if(admincause){
-                        def USER_INPUT  = input( message: 'SIT ou QUALIDADE?', parameters: [choice(choices: ['SIT', 'qualidade'], description: 'Selecione a build que pretende (SIT /QUALIDADE)', name: '')])
+                        def USER_INPUT  = input( message: 'Pretendo fazer build para:', parameters: [choice(choices: ['SIT', 'qualidade'], description: '', name: '')])
                         if("${USER_INPUT}" == "SIT"){
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
@@ -78,7 +85,10 @@ pipeline {
                             sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"  //ADICIONA Á VERSAO.(-SNAPSHOT).(DATA DA BUILD)    
                             echo "BUILD VERSION+SNAPSHOT+DATE"               
                         }
-                        sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)                                                                                            
+                        sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)
+                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        message: 'Artefacto SIT disponivel no Nexus.',
+                        status: 'Success'                                                                                              
                     }   
                 }
             }
@@ -96,6 +106,9 @@ pipeline {
                             echo "BUILD VERSION+SNAPSHOT"           
                         } 
                         sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN) 
+                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        message: 'Artefacto DEV disponivel no Nexus.',
+                        status: 'Success'  
                     }
             	}
             }
@@ -111,13 +124,16 @@ pipeline {
                         if((version.contains("-SNAPSHOT"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
                             echo "BUILD"
                            sh 'mvn versions:set -DremoveSnapshot'
-                         //h 'mvn validate -Pdrop-snapshot'
-                          // sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}\' versions:commit'    //VERSAO SEM SNAPSHOT(MAVEN)
+                            //sh 'mvn validate -Pdrop-snapshot'
+                            //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}\' versions:commit'    //VERSAO SEM SNAPSHOT(MAVEN)
                             //sh 'mvn versions:use-releases'
                             sh 'mvn versions:commit'
                             echo "BUILD VERSION ONLY"
                         }
                         sh "mvn package -DskipTests=true" 
+                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        message: 'Artefacto QUALIDADE disponivel no Nexus.',
+                        status: 'Success'  
                     }   
                     //INCREMENTO DE MINOR VERSION
                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
