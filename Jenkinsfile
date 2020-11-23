@@ -9,7 +9,7 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
     }
     parameters{
-        choice(choices: 'SIT\nqualidade', description: '', name: 'choise')
+        choice(choices: 'SIT\nqualidade', description: '', name: '')  //OPCOES BUILD WITH PARAMETERS
     }
 
     environment {
@@ -31,7 +31,7 @@ pipeline {
                     echo "SETUP ENVIRONMENT"
                     def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
                     def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
-                    if(!(timercause || admincause)){
+                    if(!(timercause || admincause)){        //CASO NAO SEJA POR TIMER OU ADMIN
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
@@ -46,18 +46,16 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else if(timercause){
+                    }else if(timercause){           //CASO SEJA TIMER
                         GLOBAL_ENVIRONMENT = 'SIT'
                         sh "git checkout develop"
                         echo "GOES TO SIT"
-                    }else if(admincause){
-                        if("${params.choise}" == 'SIT'){
-                            echo "${params.choise}"
+                    }else if(admincause){           //CASO SEJA ADMIN
+                        if("${params.choise}" == 'SIT'){        //CASO SELECIONE SIT
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"                 
-                        }else{
-                            echo "${params.choise}"
+                        }else{                                  //CASO SELECIONE QUALIDADE
                             GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
                             echo "GOES TO Qualidade"
