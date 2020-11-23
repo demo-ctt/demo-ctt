@@ -7,12 +7,6 @@ pipeline {
     
     options{
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
-        office365ConnectorWebhooks([[
-            notifySuccess: true,
-            notifyFailure: true,
-            url: TEAMS_URL
-            ]]
-        )
     }
 
     environment {
