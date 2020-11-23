@@ -80,7 +80,7 @@ pipeline {
                             echo "BUILD VERSION+SNAPSHOT+DATE"               
                         }
                         sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)
-                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        office365ConnectorSend webhookUrl: ${TEAMS_URL},
                         message: 'Artefacto SIT disponivel no Nexus.',
                         status: 'Success'                                                                                              
                     }   
@@ -100,7 +100,7 @@ pipeline {
                             echo "BUILD VERSION+SNAPSHOT"           
                         } 
                         sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN) 
-                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        office365ConnectorSend webhookUrl: ${TEAMS_URL},
                         message: 'Artefacto DEV disponivel no Nexus.',
                         status: 'Success'  
                     }
@@ -125,7 +125,7 @@ pipeline {
                             echo "BUILD VERSION ONLY"
                         }
                         sh "mvn package -DskipTests=true" 
-                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        office365ConnectorSend webhookUrl: ${TEAMS_URL},
                         message: 'Artefacto QUALIDADE disponivel no Nexus.',
                         status: 'Success'  
                     }   
