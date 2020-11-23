@@ -28,7 +28,7 @@ pipeline {
     }
   
     stages {  
-        stage("Setup env"){
+        stage("Setup"){
             steps{
                 script{ 
                     echo "SETUP ENVIRONMENT"
@@ -70,7 +70,7 @@ pipeline {
             }
         }
 
-       stage("SIT Artifact") {
+       stage("SIT") {
             steps {
                 script {                                                                                                     
                     if(GLOBAL_ENVIRONMENT == 'SIT'){
@@ -94,7 +94,7 @@ pipeline {
             }
        }  
 	    
-        stage("DEV Artifact") {       
+        stage("DEV") {       
             steps {
                 script {                                                                                              	
                     if(GLOBAL_ENVIRONMENT == 'develop'){ 
@@ -114,7 +114,7 @@ pipeline {
             }
         }
         
-         stage("Qualidade Artifact") {       
+         stage("Qualidade") {       
             steps {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'qualidade'){      
@@ -142,7 +142,7 @@ pipeline {
         }
         
         /*
-        stage("Producao Artifact") {       
+        stage("Producao") {       
             steps {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'producao'){      
@@ -152,7 +152,7 @@ pipeline {
             }
         }
         */
-        stage("Nexus Repository") {
+        stage("Nexus Repository Artifact") {
             steps { 
                 script {
                     if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
