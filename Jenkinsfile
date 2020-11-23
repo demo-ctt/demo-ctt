@@ -8,6 +8,9 @@ pipeline {
     options{
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
     }
+    parameters{
+        choice(choices: 'SIT\nqualidade', description: '', name: '')  //OPCOES BUILD WITH PARAMETERS
+    }
 
     environment {
         NEXUS_VERSION = "nexus3"
@@ -18,16 +21,17 @@ pipeline {
         GLOBAL_ENVIRONMENT = "NO BRANCH"    //VAR DE CONTROLO	 
         TIMER = "Started by timer"          //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER
         ADMIN = "Started by user"
+        TEAMS_URL = "https://outlook.office.com/webhook/27903f47-1649-4be5-8eec-b00ed76b2b6d@39c83d5e-cede-42d1-962f-c6a853ab7cf5/JenkinsCI/15874adb11b140e6bac8331836b4ad29/9469806e-38aa-43c2-b3d6-086656250e72"
     }
   
     stages {  
-        stage("Setup env"){
+        stage("Setup"){
             steps{
                 script{ 
                     echo "SETUP ENVIRONMENT"
                     def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
                     def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
-                    if(!(timercause || admincause)){
+                    if(!(timercause || admincause)){        //CASO NAO SEJA POR TIMER OU ADMIN
                         switch (env.ghprbTargetBranch){     //VAR ORIGINADA DO PULL REQUEST. DETERMINA O AMBIENTE(DEV, SIT, QUA, PROD)  
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
@@ -42,17 +46,16 @@ pipeline {
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
                                 break
                         }
-                    }else if(timercause){
+                    }else if(timercause){           //CASO SEJA TIMER
                         GLOBAL_ENVIRONMENT = 'SIT'
                         sh "git checkout develop"
                         echo "GOES TO SIT"
-                    }else if(admincause){
-                        def USER_INPUT  = input( message: 'SIT ou QUALIDADE?', parameters: [choice(choices: ['SIT', 'qualidade'], description: 'Selecione a build que pretende (SIT /QUALIDADE)', name: '')])
-                        if("${USER_INPUT}" == "SIT"){
+                    }else if(admincause){           //CASO SEJA ADMIN
+                        if("${params.choise}" == 'SIT'){        //CASO SELECIONE SIT
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"                 
-                        }else{
+                        }else{                                  //CASO SELECIONE QUALIDADE
                             GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
                             echo "GOES TO Qualidade"
@@ -63,7 +66,7 @@ pipeline {
             }
         }
 
-       stage("SIT Artifact") {
+       stage("SIT") {
             steps {
                 script {                                                                                                     
                     if(GLOBAL_ENVIRONMENT == 'SIT'){
@@ -78,13 +81,16 @@ pipeline {
                             sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"  //ADICIONA Á VERSAO.(-SNAPSHOT).(DATA DA BUILD)    
                             echo "BUILD VERSION+SNAPSHOT+DATE"               
                         }
-                        sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)                                                                                            
+                        sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)
+                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        message: 'Artefacto SIT disponivel no Nexus.',
+                        status: 'Success'                                                                                              
                     }   
                 }
             }
        }  
 	    
-        stage("DEV Artifact") {       
+        stage("DEV") {       
             steps {
                 script {                                                                                              	
                     if(GLOBAL_ENVIRONMENT == 'develop'){ 
@@ -96,12 +102,15 @@ pipeline {
                             echo "BUILD VERSION+SNAPSHOT"           
                         } 
                         sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN) 
+                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        message: 'Artefacto DEV disponivel no Nexus.',
+                        status: 'Success'  
                     }
             	}
             }
         }
         
-         stage("Qualidade Artifact") {       
+         stage("Qualidade") {       
             steps {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'qualidade'){      
@@ -110,33 +119,25 @@ pipeline {
                         def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)     
                         if((version.contains("-SNAPSHOT"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
                             echo "BUILD"
-                           sh 'mvn versions:set -DremoveSnapshot'
-                         //h 'mvn validate -Pdrop-snapshot'
-                          // sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}\' versions:commit'    //VERSAO SEM SNAPSHOT(MAVEN)
+                            sh 'mvn versions:set -DremoveSnapshot'
+                            //sh 'mvn validate -Pdrop-snapshot'
+                            //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}\' versions:commit'    //VERSAO SEM SNAPSHOT(MAVEN)
                             //sh 'mvn versions:use-releases'
                             sh 'mvn versions:commit'
                             echo "BUILD VERSION ONLY"
                         }
                         sh "mvn package -DskipTests=true" 
+                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        message: 'Artefacto QUALIDADE disponivel no Nexus.',
+                        status: 'Success'  
                     }   
                     //INCREMENTO DE MINOR VERSION
                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
                 }
             }
         }
-        
-        /*
-        stage("Producao Artifact") {       
-            steps {
-                script {
-                    if(GLOBAL_ENVIRONMENT == 'producao'){      
-                        echo "INSIDE PRODUCAO"
-                    }   
-                }
-            }
-        }
-        */
-        stage("Nexus Repository") {
+
+        stage("Nexus Repository Artifact") {
             steps { 
                 script {
                     if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
