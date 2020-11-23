@@ -7,12 +7,6 @@ pipeline {
     
     options{
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
-        office365ConnectorWebhooks([[
-            notifySuccess: true,
-            notifyFailure: true,
-            url: TEAMS_URL
-            ]]
-        )
     }
 
     environment {
@@ -28,7 +22,7 @@ pipeline {
     }
   
     stages {  
-        stage("Setup env"){
+        stage("Setup"){
             steps{
                 script{ 
                     echo "SETUP ENVIRONMENT"
@@ -70,7 +64,7 @@ pipeline {
             }
         }
 
-       stage("SIT Artifact") {
+       stage("SIT") {
             steps {
                 script {                                                                                                     
                     if(GLOBAL_ENVIRONMENT == 'SIT'){
@@ -86,7 +80,7 @@ pipeline {
                             echo "BUILD VERSION+SNAPSHOT+DATE"               
                         }
                         sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)
-                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        office365ConnectorSend webhookUrl: ${TEAMS_URL},
                         message: 'Artefacto SIT disponivel no Nexus.',
                         status: 'Success'                                                                                              
                     }   
@@ -94,7 +88,7 @@ pipeline {
             }
        }  
 	    
-        stage("DEV Artifact") {       
+        stage("DEV") {       
             steps {
                 script {                                                                                              	
                     if(GLOBAL_ENVIRONMENT == 'develop'){ 
@@ -106,7 +100,7 @@ pipeline {
                             echo "BUILD VERSION+SNAPSHOT"           
                         } 
                         sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN) 
-                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        office365ConnectorSend webhookUrl: ${TEAMS_URL},
                         message: 'Artefacto DEV disponivel no Nexus.',
                         status: 'Success'  
                     }
@@ -114,7 +108,7 @@ pipeline {
             }
         }
         
-         stage("Qualidade Artifact") {       
+         stage("Qualidade") {       
             steps {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'qualidade'){      
@@ -131,7 +125,7 @@ pipeline {
                             echo "BUILD VERSION ONLY"
                         }
                         sh "mvn package -DskipTests=true" 
-                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        office365ConnectorSend webhookUrl: ${TEAMS_URL},
                         message: 'Artefacto QUALIDADE disponivel no Nexus.',
                         status: 'Success'  
                     }   
@@ -142,7 +136,7 @@ pipeline {
         }
         
         /*
-        stage("Producao Artifact") {       
+        stage("Producao") {       
             steps {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'producao'){      
@@ -152,7 +146,7 @@ pipeline {
             }
         }
         */
-        stage("Nexus Repository") {
+        stage("Nexus Repository Artifact") {
             steps { 
                 script {
                     if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
