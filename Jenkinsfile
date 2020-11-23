@@ -9,6 +9,12 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
     }
 
+    properties{
+        parameters([
+            booleanParam(name: 'RELEASE', default: false, description: "SOMETHING")
+        ])
+    }
+
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
