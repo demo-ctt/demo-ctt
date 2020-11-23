@@ -51,7 +51,7 @@ pipeline {
                         sh "git checkout develop"
                         echo "GOES TO SIT"
                     }else if(admincause){
-                        if('${choise}' == "SIT"){
+                        if(${params.choise} == "SIT"){
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"                 
