@@ -9,7 +9,7 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
     }
     parameters{
-        choice(choices: 'SIT\nqualidade', description: '', name: 'choise')
+        choice(choices: ['SIT\nqualidade'] description: '', name: 'choise')
     }
 
     environment {
@@ -52,10 +52,12 @@ pipeline {
                         echo "GOES TO SIT"
                     }else if(admincause){
                         if('${params.choise}' == 'SIT'){
+                            echo "${params.choise}"
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"                 
                         }else{
+                            echo "${params.choise}"
                             GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
                             echo "GOES TO Qualidade"
