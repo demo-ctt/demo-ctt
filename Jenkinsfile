@@ -51,6 +51,7 @@ pipeline {
                         sh "git checkout develop"
                         echo "GOES TO SIT"
                     }else if(admincause){           //CASO SEJA ADMIN
+                        echo "${params.choise}"
                         if("${params.choise}" == 'SIT'){        //CASO SELECIONE SIT
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
