@@ -9,7 +9,7 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
     }
     parameters{
-        choice(choices: 'SIT\nqualidade', description: '', name: '')  //OPCOES BUILD WITH PARAMETERS
+        choice(choices: 'SIT\nqualidade', description: '', name: 'Ambiente')  //OPCOES BUILD WITH PARAMETERS
     }
 
     environment {
@@ -51,11 +51,11 @@ pipeline {
                         sh "git checkout develop"
                         echo "GOES TO SIT"
                     }else if(admincause){           //CASO SEJA ADMIN
-                        if("${params.choise}" == "SIT"){        //CASO SELECIONE SIT
+                        if("${params.Ambiente}" == "SIT"){        //CASO SELECIONE SIT
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"                 
-                        }else if("${params.choise}" == "qualidade"){                                  //CASO SELECIONE QUALIDADE
+                        }else if("${params.Ambiente}" == "qualidade"){                                  //CASO SELECIONE QUALIDADE
                             GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
                             echo "GOES TO Qualidade"
