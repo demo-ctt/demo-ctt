@@ -9,7 +9,7 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))      //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
     }
     parameters{
-        choice(choices: ['SIT\nqualidade'], description: '', name: '')  //OPCOES BUILD WITH PARAMETERS
+        choice(choices: 'SIT\nqualidade', description: '', name: '')  //OPCOES BUILD WITH PARAMETERS
     }
 
     environment {
