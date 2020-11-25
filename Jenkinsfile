@@ -23,6 +23,12 @@ pipeline {
         ADMIN = "Started by user"
         TEAMS_URL = "https://outlook.office.com/webhook/27903f47-1649-4be5-8eec-b00ed76b2b6d@39c83d5e-cede-42d1-962f-c6a853ab7cf5/JenkinsCI/15874adb11b140e6bac8331836b4ad29/9469806e-38aa-43c2-b3d6-086656250e72"
     }
+
+
+    def readPom(){
+        def pom = readMavenPom file: "pom.xml"  //LE POM
+        def version = "${pom.version}"
+    }
   
     stages {  
         stage("Setup"){
@@ -55,7 +61,7 @@ pipeline {
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"                 
-                        }else if("${params.Ambiente}" == "qualidade"){                                  //CASO SELECIONE QUALIDADE
+                        }else{                                  //CASO SELECIONE QUALIDADE
                             GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
                             echo "GOES TO Qualidade"
@@ -71,9 +77,7 @@ pipeline {
                 script {                                                                                                     
                     if(GLOBAL_ENVIRONMENT == 'SIT'){
                         echo "INSIDE SIT"
-                        def pom = readMavenPom file: "pom.xml"  //LE POM
-                        def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)
-                    
+                        readPom()                  
                         if((version.contains("-SNAPSHOT"))){      //CASO CONTENHA -SNAPSHOT                                                                     
                             sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  //ADICIONA Á VERSAO.(DATA DA BUILD)
                             echo "BUILD VERSION+DATE"
@@ -83,7 +87,7 @@ pipeline {
                         }
                         sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)
                         office365ConnectorSend webhookUrl: TEAMS_URL,
-                        message: 'Artefacto SIT disponivel no Nexus.',
+                        message: 'Novo Artefacto SIT disponivel.',
                         status: 'Success'                                                                                              
                     }   
                 }
@@ -103,7 +107,7 @@ pipeline {
                         } 
                         sh "mvn package -DskipTests=true"   //PACKAGE(MAVEN) 
                         office365ConnectorSend webhookUrl: TEAMS_URL,
-                        message: 'Artefacto DEV disponivel no Nexus.',
+                        message: 'Novo Artefacto DEV disponivel.',
                         status: 'Success'  
                     }
             	}
@@ -128,7 +132,7 @@ pipeline {
                         }
                         sh "mvn package -DskipTests=true" 
                         office365ConnectorSend webhookUrl: TEAMS_URL,
-                        message: 'Artefacto QUALIDADE disponivel no Nexus.',
+                        message: 'Novo Artefacto QUALIDADE disponivel.',
                         status: 'Success'  
                     }   
                     //INCREMENTO DE MINOR VERSION
