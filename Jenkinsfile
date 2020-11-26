@@ -83,7 +83,7 @@ pipeline {
                         }
                         sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)
                         office365ConnectorSend webhookUrl: TEAMS_URL,
-                        message: 'Novo Artefacto SIT disponivel. Version = ${pom.version}',
+                        message: "Novo Artefacto SIT disponivel. Version = '${pom.version}'",
                         status: 'Success'                                                                                              
                     }   
                 }
