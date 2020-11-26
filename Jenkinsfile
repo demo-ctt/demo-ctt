@@ -39,8 +39,8 @@ pipeline {
                             case 'qualidade':
                                 GLOBAL_ENVIRONMENT = 'qualidade'
                                 break
-                            case 'master':
-                                GLOBAL_ENVIRONMENT = 'producao'
+                            case 'hotfix/*':
+                                GLOBAL_ENVIRONMENT = 'hotfix'
                                 break
                             default:
                                 GLOBAL_ENVIRONMENT = "NO BRANCH"
@@ -83,7 +83,7 @@ pipeline {
                         }
                         sh "mvn package -DskipTests=true"       //PACKAGE(MAVEN)
                         office365ConnectorSend webhookUrl: TEAMS_URL,
-                        message: 'Novo Artefacto SIT disponivel.',
+                        message: 'Novo Artefacto SIT disponivel. Version = ${pom.version}',
                         status: 'Success'                                                                                              
                     }   
                 }
@@ -121,10 +121,12 @@ pipeline {
                             echo "BUILD"
                             sh 'mvn versions:set -DremoveSnapshot'
                             //sh 'mvn validate -Pdrop-snapshot'
-                            //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}\' versions:commit'    //VERSAO SEM SNAPSHOT(MAVEN)
                             //sh 'mvn versions:use-releases'
                             sh 'mvn versions:commit'
                             echo "BUILD VERSION ONLY"
+                        }
+                        if((version.contains("-HOTFIX"))){
+                            sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.patchVersion}\' versions:commit'
                         }
                         sh "mvn package -DskipTests=true" 
                         office365ConnectorSend webhookUrl: TEAMS_URL,
@@ -133,6 +135,27 @@ pipeline {
                     }   
                     //INCREMENTO DE MINOR VERSION
                     //sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}\' versions:commit'
+                }
+            }
+        }
+
+
+         stage("HOTFIX") {       
+            steps {
+                script {
+                    if(GLOBAL_ENVIRONMENT == 'hotfix'){      
+                        echo "INSIDE HOTFIX branch"
+                        def pom = readMavenPom file: "pom.xml"  //LE POM
+                        def version = "${pom.version}"          //APENAS A VERSAO(Ex:1.2)     
+                        if((version.contains("-HOTFIX"))){     //CASO CONTENHA (-SNAPSHOT).(DATA DA BUILD)
+                            sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextPatchVersion}-HOTFIX\' versions:commit'
+                            echo "BUILD HOTFIX"
+                        }
+                        sh "mvn package -DskipTests=true" 
+                        office365ConnectorSend webhookUrl: TEAMS_URL,
+                        message: 'Novo Artefacto HOTFIX disponivel.',
+                        status: 'Success'  
+                    }   
                 }
             }
         }
