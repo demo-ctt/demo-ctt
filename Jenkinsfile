@@ -59,17 +59,23 @@ pipeline {
                         }
                     //CASO SEJA TIMER
                     }else if(timercause){           
-                        GLOBAL_ENVIRONMENT = 'develop'
+                        GLOBAL_ENVIRONMENT = 'SIT'
                         sh "git checkout develop"
-                        echo "GOES TO develop"
+                        echo "GOES TO SIT"
                     //CASO SEJA ADMIN                      
                     }else if(admincause){           
-                        //CASO SELECIONE SIT
-                        if("${params.Ambiente}" == "develop"){        
+                        //CASO SELECIONE DEV
+                        if("${params.Ambiente}" == "DEV"){        
                             GLOBAL_ENVIRONMENT = 'develop' 
                             sh "git checkout develop"
+				echo "GOES TO develop"
+			}
+                        //CASO SELECIONE SIT       
+			if("${params.Ambiente}" == "SIT"){        
+                            GLOBAL_ENVIRONMENT = 'SIT' 
+                            sh "git checkout develop"
                             echo "GOES TO SIT"
-                        //CASO SELECIONE QUALIDADE                 
+                        //CASO SELECIONE QUALIDADE 
                         }else{                                  
                             GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
