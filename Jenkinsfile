@@ -12,7 +12,7 @@ pipeline {
     }
     parameters{
         //OPCAO BUILD WITH PARAMETERS
-        choice(choices: 'Dev\SIT\nqualidade', description: '', name: 'Ambiente')  
+        choice(choices: 'SIT\nqualidade', description: '', name: 'Ambiente')  
     }
 
     environment {
@@ -65,8 +65,8 @@ pipeline {
                     //CASO SEJA ADMIN                      
                     }else if(admincause){           
                         //CASO SELECIONE SIT
-                        if("${params.Ambiente}" == "SIT"){        
-                            GLOBAL_ENVIRONMENT = 'SIT' 
+                        if("${params.Ambiente}" == "develop"){        
+                            GLOBAL_ENVIRONMENT = 'develop' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"
                         //CASO SELECIONE QUALIDADE                 
