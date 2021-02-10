@@ -12,7 +12,7 @@ pipeline {
     }
     parameters{
         //OPCAO BUILD WITH PARAMETERS
-        choice(choices: 'SIT\nqualidade', description: '', name: 'Ambiente')  
+        choice(choices: 'DEV\nSIT\nqualidade', description: '', name: 'Ambiente')  
     }
 
     environment {
