@@ -59,9 +59,9 @@ pipeline {
                         }
                     //CASO SEJA TIMER
                     }else if(timercause){           
-                        GLOBAL_ENVIRONMENT = 'SIT'
+                        GLOBAL_ENVIRONMENT = 'develop'
                         sh "git checkout develop"
-                        echo "GOES TO SIT"
+                        echo "GOES TO develop"
                     //CASO SEJA ADMIN                      
                     }else if(admincause){           
                         //CASO SELECIONE SIT
