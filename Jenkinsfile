@@ -1,6 +1,11 @@
 pipeline {
     //TRIGGER SIT (1x/dia) as (10 da noite) de (segunda a sexta)
-    triggers { cron('0 22 * * 1-5') }         
+	
+    triggers { 
+	    parameterizedCron('''
+		    */2 * * * * %Ambiente=DEV
+		    */5 * * * * %Ambiente=SIT
+		    ''') }         
     
     agent { label 'master' }
     
