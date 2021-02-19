@@ -76,7 +76,8 @@ pipeline {
 			if("${params.Ambiente}" == "SIT"){        
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
-                            echo "GOES TO SIT"                   
+                            echo "GOES TO SIT"  
+			 }	
                     }else if(admincause){           
                         //CASO SELECIONE DEV
                         if("${params.Ambiente}" == "DEV"){        
