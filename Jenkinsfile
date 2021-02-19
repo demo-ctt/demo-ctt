@@ -18,6 +18,7 @@ pipeline {
     parameters{
         //OPCAO BUILD WITH PARAMETERS
 	string(name: 'Ambiente', defaultValue: 'DEV')
+	string(name: 'Ambiente', defaultValue: 'SIT')
         choice(choices: 'DEV\nSIT\nqualidade', description: '', name: 'Ambiente')  
     }
 
