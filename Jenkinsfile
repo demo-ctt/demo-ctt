@@ -1,6 +1,11 @@
 pipeline {
     //TRIGGER SIT (1x/dia) as (10 da noite) de (segunda a sexta)
-    triggers { cron('0 22 * * 1-5') }         
+	
+    triggers { 
+	    parameterizedCron('''
+		    */2 * * * * %Ambiente=DEV
+		    */5 * * * * %Ambiente=SIT
+		    ''') }         
     
     agent { label 'master' }
     
@@ -12,7 +17,9 @@ pipeline {
     }
     parameters{
         //OPCAO BUILD WITH PARAMETERS
-        choice(choices: 'SIT\nqualidade', description: '', name: 'Ambiente')  
+	string(name: 'Ambiente', defaultValue: 'DEV')
+	string(name: 'Ambiente', defaultValue: 'SIT')
+        choice(choices: 'DEV\nSIT\nqualidade', description: '', name: 'Ambiente')  
     }
 
     environment {
@@ -59,17 +66,31 @@ pipeline {
                         }
                     //CASO SEJA TIMER
                     }else if(timercause){           
-                        GLOBAL_ENVIRONMENT = 'SIT'
-                        sh "git checkout develop"
-                        echo "GOES TO SIT"
-                    //CASO SEJA ADMIN                      
+                        //CASO SELECIONE DEV
+                        if("${params.Ambiente}" == "DEV"){        
+                            GLOBAL_ENVIRONMENT = 'develop' 
+                            sh "git checkout develop"
+				echo "GOES TO develop"
+			}
+                        //CASO SELECIONE SIT       
+			if("${params.Ambiente}" == "SIT"){        
+                            GLOBAL_ENVIRONMENT = 'SIT' 
+                            sh "git checkout develop"
+                            echo "GOES TO SIT"  
+			 }	
                     }else if(admincause){           
-                        //CASO SELECIONE SIT
-                        if("${params.Ambiente}" == "SIT"){        
+                        //CASO SELECIONE DEV
+                        if("${params.Ambiente}" == "DEV"){        
+                            GLOBAL_ENVIRONMENT = 'develop' 
+                            sh "git checkout develop"
+				echo "GOES TO develop"
+			}
+                        //CASO SELECIONE SIT       
+			if("${params.Ambiente}" == "SIT"){        
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"
-                        //CASO SELECIONE QUALIDADE                 
+                        //CASO SELECIONE QUALIDADE 
                         }else{                                  
                             GLOBAL_ENVIRONMENT = 'qualidade'
                             sh "git checkout qualidade"
