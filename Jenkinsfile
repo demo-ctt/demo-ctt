@@ -18,8 +18,8 @@ pipeline {
     }
     parameters{
         //OPCAO BUILD WITH PARAMETERS
-	    string(name: 'Ambiente', defaultValue: 'DEV')
-	    string(name: 'Ambiente', defaultValue: 'SIT')
+	string(name: 'Ambiente', defaultValue: 'DEV')
+	string(name: 'Ambiente', defaultValue: 'SIT')
         choice(choices: 'DEV\nSIT\nquality', description: '', name: 'Ambiente')  
     }
 
@@ -37,14 +37,15 @@ pipeline {
         ADMIN = "Started by user"
         TEAMS_URL = "MS_TEAMS_BUILDS_DEPLOYS_WEBHOOK_URL"
 
+
         //Microsoft Teams Notification Colors (Hexadecimal Color)
         msg_color_success = "#00CC00"
         msg_color_failure = "#FF0000"
         msg_color_aborted = "#A6A6A6"
     }
+
     
-    stages { 
-        
+    stages {  
         stage("Setup"){
             steps{
                 script{ 
@@ -100,33 +101,36 @@ pipeline {
                             echo "GOES TO quality"
                         }
                     }
+                    
                 }
             }
         }
-        stage('READ POM'){
+	    
+	stage('READ POM'){
             steps{
                 script{
                     //READ POM
-                    pom = readMavenPom file: "pom.xml"  
+                    pom = readMavenPom file: "pom.xml" 
                     //GET POM VERSION
                     version = "${pom.version}"
-                    echo "$version"   
+		    echo "${version}"   
                 }
             }
         }
-        stage("SIT") {
+
+       stage("SIT") {
             steps {
-		    echo "${version}"
+		echo "${version}"
                 script {                                                                                                     
-                    if(GLOBAL_ENVIRONMENT == 'SIT'){       
-                    
+                    if(GLOBAL_ENVIRONMENT == 'SIT'){         
                         //CASO CONTENHA -SNAPSHOT
                         if((version.contains("-SNAPSHOT"))){                                                                           
                             //ADICIONA Á VERSAO.(DATA DA BUILD)
-                            sh "mvn -q versions:set -DnewVersion=${version}-$BUILD_TIMESTAMP"   
+                            sh "mvn -q versions:set -DnewVersion=${pom.version}-${BUILD_TIMESTAMP}"    
+                            //mvn build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion} versions:commit             
                         }else{ 
                             //ADICIONA Á VERSAO.(-SNAPSHOT).(DATA DA BUILD)  	                                                                           
-                            sh "mvn -q versions:set -DnewVersion=${version}-SNAPSHOT-$BUILD_TIMESTAMP"               
+                            sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"               
                         }
                         //PACKAGE(MAVEN)
                         sh "mvn package -DskipTests=true"                                                                                                     
@@ -137,11 +141,13 @@ pipeline {
 	    
         stage("DEV") {       
             steps {
+		echo "${version}"
                 script {                                                                                              	
-                    if(GLOBAL_ENVIRONMENT == 'develop'){                             
-                        if(!(${version}.contains("-SNAPSHOT"))){
+                    if(GLOBAL_ENVIRONMENT == 'develop'){   
+                        //CASO NAO CONTENHA (-SNAPSHOT)                             
+                        if(!(version.contains("-SNAPSHOT"))){
                             //VERSAO ADICIONA SNAPSHOT (MAVEN)                                                                                            
-                            sh "mvn -q versions:set -DnewVersion=${version}-SNAPSHOT"              
+                            sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"              
                         } 
                         //PACKAGE(MAVEN)
                         sh "mvn package -DskipTests=true"      
@@ -152,16 +158,17 @@ pipeline {
         
          stage("quality") {       
             steps {
+		echo "${version}"
                 script {
                     if(GLOBAL_ENVIRONMENT == 'quality'){      
                         //CASO CONTENHA (-SNAPSHOT)              
-                        if((${version}.contains("-SNAPSHOT"))){     
+                        if((version.contains("-SNAPSHOT"))){     
                             echo "BUILD"
                             //REMOVE -SNAPSHOT
                             sh 'mvn versions:set -DremoveSnapshot'
-                            sh 'mvn versions:commit'
+                            //sh 'mvn versions:commit'
                         }
-                        if((${version}.contains("-HOTFIX"))){
+                        if((version.contains("-HOTFIX"))){
                             //COLOCA APENAS A VERSAO
                             sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.patchVersion}\' versions:commit'
                         }
@@ -174,10 +181,11 @@ pipeline {
 
          stage("HOTFIX") {       
             steps {
+		echo "${version}"
                 script {
                     if(GLOBAL_ENVIRONMENT == 'hotfix'){      
                         //CASO CONTENHA (-HOTFIX)            
-                        if((${version}.contains("-HOTFIX"))){     
+                        if((version.contains("-HOTFIX"))){     
                             //INCREMENTO DE PATCH VERSION
                             sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextPatchVersion}-HOTFIX\' versions:commit'
                         }
@@ -189,9 +197,12 @@ pipeline {
 
         stage("Nexus Repository Artifact") {
             steps { 
+		echo "${pom}"
                 script {
-                    if(GLOBAL_ENVIRONMENT != "NO BRANCH"){ 
-                        def artifactName = "${pom.artifactId}-${version}-${pom.packaging}.jar" 
+                    if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
+                        echo "INSIDE NEXUS PUBLISHER"
+                        //NOME DO ARTEFACTO     
+                        def artifactName = "${pom.artifactId}-${pom.version}-${pom.packaging}.jar" 
                         //CAMINHO DO ARTEFACTO
                         def artifactPath = "target/${artifactName}" 
 
@@ -199,7 +210,7 @@ pipeline {
                         nexusArtifactUploader(
                             nexusVersion: NEXUS_VERSION, protocol: NEXUS_PROTOCOL,
                             nexusUrl: NEXUS_URL, groupId: pom.groupId,
-                            version: "${version}", repository: NEXUS_REPOSITORY,
+                            version: pom.version, repository: NEXUS_REPOSITORY,
                             credentialsId: NEXUS_CREDENTIAL_ID,
 
                             artifacts: [
