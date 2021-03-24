@@ -1,10 +1,16 @@
 pipeline {
-    //TRIGGER SIT (1x/dia) as (10 da noite) de (segunda a sexta)
-    triggers { cron('0 22 * * 1-5') }         
+
+    triggers { 
+        //TRIGGER DEV (30 em 30 minutos)
+        //TRIGGER SIT (1x/dia) as (10 da noite) de (segunda a sexta)
+	    parameterizedCron('''
+		    */30 * * * 1-5 %Ambiente=DEV
+		    * 22 * * 1-5 %Ambiente=SIT
+		    ''') }         
     
     agent { label 'master' }
     
-    tools { maven "Maven" }
+    tools { maven "maven 3.6.3" }
     
     options{
         //MANTEM MAXIMO 10 ARTEFACTOS ARQUIVADOS
@@ -12,29 +18,36 @@ pipeline {
     }
     parameters{
         //OPCAO BUILD WITH PARAMETERS
-        choice(choices: 'SIT\nqualidade', description: '', name: 'Ambiente')  
+	    string(name: 'Ambiente', defaultValue: 'DEV')
+	    string(name: 'Ambiente', defaultValue: 'SIT')
+        choice(choices: 'DEV\nSIT\nquality', description: '', name: 'Ambiente')  
     }
 
     environment {
         NEXUS_VERSION = "nexus3"
-        NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "172.17.0.1:8081"
-        NEXUS_REPOSITORY = "maven-nexus-repo"
-        NEXUS_CREDENTIAL_ID = "nexus-credentials" 
+        NEXUS_PROTOCOL = "https"
+        NEXUS_URL = "devops-nexus.internal.bancopostal.pt"
+        NEXUS_REPOSITORY = "maven-nexus-repo/"
+        NEXUS_CREDENTIAL_ID = "NEXUS_CREDENTIALS" 
         //VAR DE CONTROLO
         GLOBAL_ENVIRONMENT = "NO BRANCH"    	
         //STRING DO SISTEMA EM CASO DE TRIGGER POR TIMER 
         TIMER = "Started by timer"          
         //STRING DO SISTEMA EM CASO DE TRIGGER POR ADMIN
         ADMIN = "Started by user"
-        TEAMS_URL = "https://outlook.office.com/webhook/27903f47-1649-4be5-8eec-b00ed76b2b6d@39c83d5e-cede-42d1-962f-c6a853ab7cf5/JenkinsCI/15874adb11b140e6bac8331836b4ad29/9469806e-38aa-43c2-b3d6-086656250e72"
-    }
+        TEAMS_URL = "MS_TEAMS_BUILDS_DEPLOYS_WEBHOOK_URL"
 
-    stages {  
+        //Microsoft Teams Notification Colors (Hexadecimal Color)
+        msg_color_success = "#00CC00"
+        msg_color_failure = "#FF0000"
+        msg_color_aborted = "#A6A6A6"
+    }
+    
+    stages { 
+        
         stage("Setup"){
             steps{
                 script{ 
-                    echo "SETUP ENVIRONMENT"
                     def admincause = currentBuild.getBuildCauses()[0].shortDescription.contains(ADMIN)
                     def timercause = currentBuild.getBuildCauses()[0].shortDescription.contains(TIMER)
                     //CASO NAO SEJA POR TIMER OU ADMIN
@@ -45,9 +58,9 @@ pipeline {
                             case 'develop':
                                 GLOBAL_ENVIRONMENT = 'develop'
                                 break
-                            //BRANCH qualidade
-                            case 'qualidade':
-                                GLOBAL_ENVIRONMENT = 'qualidade'
+                            //BRANCH quality
+                            case 'quality':
+                                GLOBAL_ENVIRONMENT = 'quality'
                                 break
                             //QUALQUER BRANCH HOTFIX
                             case 'hotfix/*':
@@ -59,53 +72,60 @@ pipeline {
                         }
                     //CASO SEJA TIMER
                     }else if(timercause){           
-                        GLOBAL_ENVIRONMENT = 'SIT'
-                        sh "git checkout develop"
-                        echo "GOES TO SIT"
-                    //CASO SEJA ADMIN                      
+                        //CASO SELECIONE DEV
+                        if("${params.Ambiente}" == "DEV"){        
+                            GLOBAL_ENVIRONMENT = 'develop' 
+                            sh "git checkout develop"
+			            }
+                        //CASO SELECIONE SIT       
+			            if("${params.Ambiente}" == "SIT"){        
+                            GLOBAL_ENVIRONMENT = 'SIT' 
+                            sh "git checkout develop" 
+			            }	
                     }else if(admincause){           
-                        //CASO SELECIONE SIT
-                        if("${params.Ambiente}" == "SIT"){        
+                        //CASO SELECIONE DEV
+                        if("${params.Ambiente}" == "DEV"){        
+                            GLOBAL_ENVIRONMENT = 'develop' 
+                            sh "git checkout develop"
+			            }
+            //CASO SELECIONE SIT       
+			        else if("${params.Ambiente}" == "SIT"){        
                             GLOBAL_ENVIRONMENT = 'SIT' 
                             sh "git checkout develop"
                             echo "GOES TO SIT"
-                        //CASO SELECIONE QUALIDADE                 
-                        }else{                                  
-                            GLOBAL_ENVIRONMENT = 'qualidade'
-                            sh "git checkout qualidade"
-                            echo "GOES TO Qualidade"
+                        //CASO SELECIONE quality 
+                        }else if("${params.Ambiente}" == "quality"){                                  
+                            GLOBAL_ENVIRONMENT = 'quality'
+                            sh "git checkout quality"
+                            echo "GOES TO quality"
                         }
                     }
-                    
                 }
             }
         }
-
-       stage("SIT") {
+        stage('READ POM'){
+            steps{
+                script{
+                    //READ POM
+                    def pom = readMavenPom file: "pom.xml"  
+                    //GET POM VERSION
+                    def version = "${pom.version}"
+                    echo "$version"   
+                }
+            }
+        }
+        stage("SIT") {
             steps {
                 script {                                                                                                     
-                    if(GLOBAL_ENVIRONMENT == 'SIT'){
-                        echo "INSIDE SIT"
-                        //LE POM
-                        def pom = readMavenPom file: "pom.xml"  
-                        //APENAS A VERSAO(Ex:1.2)
-                        def version = "${pom.version}"          
+                    if(GLOBAL_ENVIRONMENT == 'SIT'){       
                     
                         //CASO CONTENHA -SNAPSHOT
                         if((version.contains("-SNAPSHOT"))){                                                                           
                             //ADICIONA Á VERSAO.(DATA DA BUILD)
-                            sh "mvn -q versions:set -DnewVersion=${pom.version}-$BUILD_TIMESTAMP"  
-                            echo "BUILD VERSION+DATE"
-                            office365ConnectorSend webhookUrl: TEAMS_URL,
-                            message: "Novo Artefacto SIT disponivel. Versao -${pom.version}-$BUILD_TIMESTAMP",
-                            status: 'Success' 
+                            sh "mvn -q versions:set -DnewVersion=${version}-$BUILD_TIMESTAMP"   
                         }else{ 
                             //ADICIONA Á VERSAO.(-SNAPSHOT).(DATA DA BUILD)  	                                                                           
-                            sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP"      
-                            echo "BUILD VERSION+SNAPSHOT+DATE"
-                            office365ConnectorSend webhookUrl: TEAMS_URL,
-                            message: "Novo Artefacto SIT disponivel. Versao -${pom.version}-SNAPSHOT-$BUILD_TIMESTAMP",
-                            status: 'Success'               
+                            sh "mvn -q versions:set -DnewVersion=${version}-SNAPSHOT-$BUILD_TIMESTAMP"               
                         }
                         //PACKAGE(MAVEN)
                         sh "mvn package -DskipTests=true"                                                                                                     
@@ -117,21 +137,10 @@ pipeline {
         stage("DEV") {       
             steps {
                 script {                                                                                              	
-                    if(GLOBAL_ENVIRONMENT == 'develop'){ 
-                        echo "INSIDE DEV"    
-                        //LE POM
-                        def pom = readMavenPom file: "pom.xml" 
-                        //APENAS A VERSAO(Ex:1.2)    
-                        def version = "${pom.version}" 
-                        //CASO NAO CONTENHA (-SNAPSHOT)                             
-                        if(!(version.contains("-SNAPSHOT"))){
+                    if(GLOBAL_ENVIRONMENT == 'develop'){                             
+                        if(!(${version}.contains("-SNAPSHOT"))){
                             //VERSAO ADICIONA SNAPSHOT (MAVEN)                                                                                            
-                            sh "mvn -q versions:set -DnewVersion=${pom.version}-SNAPSHOT"     
-                            echo "BUILD VERSION+SNAPSHOT"
-                            //NOTIFICA TEAMS
-                            office365ConnectorSend webhookUrl: TEAMS_URL,
-                            message: "Novo Artefacto DEV disponivel. Versao -${pom.version}-SNAPSHOT",
-                            status: 'Success'           
+                            sh "mvn -q versions:set -DnewVersion=${version}-SNAPSHOT"              
                         } 
                         //PACKAGE(MAVEN)
                         sh "mvn package -DskipTests=true"      
@@ -140,34 +149,20 @@ pipeline {
             }
         }
         
-         stage("Qualidade") {       
+         stage("quality") {       
             steps {
                 script {
-                    if(GLOBAL_ENVIRONMENT == 'qualidade'){      
-                        echo "INSIDE QUALIDADE"
-                        //LE POM
-                        def pom = readMavenPom file: "pom.xml" 
-                        //APENAS A VERSAO(Ex:1.2) 
-                        def version = "${pom.version}" 
+                    if(GLOBAL_ENVIRONMENT == 'quality'){      
                         //CASO CONTENHA (-SNAPSHOT)              
-                        if((version.contains("-SNAPSHOT"))){     
+                        if((${version}.contains("-SNAPSHOT"))){     
                             echo "BUILD"
                             //REMOVE -SNAPSHOT
                             sh 'mvn versions:set -DremoveSnapshot'
                             sh 'mvn versions:commit'
-                            echo "BUILD VERSION ONLY"
-                            //NOTIFICA TEAMS
-                            office365ConnectorSend webhookUrl: TEAMS_URL,
-                            message: "Novo Artefacto QUALIDADE disponivel. Versao -${pom.version}",
-                            status: 'Success'
                         }
-                        if((version.contains("-HOTFIX"))){
+                        if((${version}.contains("-HOTFIX"))){
                             //COLOCA APENAS A VERSAO
                             sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.patchVersion}\' versions:commit'
-                            //NOTIFICA TEAMS
-                            office365ConnectorSend webhookUrl: TEAMS_URL,
-                            message: "Novo Artefacto HOTFIX disponivel. Versao -${pom.version}",
-                            status: 'Success' 
                         }
                         sh "mvn package -DskipTests=true"   
                     }   
@@ -180,20 +175,10 @@ pipeline {
             steps {
                 script {
                     if(GLOBAL_ENVIRONMENT == 'hotfix'){      
-                        echo "INSIDE HOTFIX branch"
-                        //LE POM
-                        def pom = readMavenPom file: "pom.xml" 
-                        //APENAS A VERSAO(Ex:1.2)  
-                        def version = "${pom.version}"
                         //CASO CONTENHA (-HOTFIX)            
-                        if((version.contains("-HOTFIX"))){     
+                        if((${version}.contains("-HOTFIX"))){     
                             //INCREMENTO DE PATCH VERSION
                             sh 'mvn build-helper:parse-version versions:set -DnewVersion=\'${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextPatchVersion}-HOTFIX\' versions:commit'
-                            echo "BUILD HOTFIX"
-                            //NOTIFICA TEAMS
-                            office365ConnectorSend webhookUrl: TEAMS_URL,
-                            message: "Novo Artefacto HOTFIX disponivel. Versao -${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextPatchVersion}-HOTFIX",
-                            status: 'Success'
                         }
                         sh "mvn package -DskipTests=true"   
                     }   
@@ -204,12 +189,8 @@ pipeline {
         stage("Nexus Repository Artifact") {
             steps { 
                 script {
-                    if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
-                        echo "INSIDE NEXUS PUBLISHER"
-                        //LE POM
-                        def pom = readMavenPom file: "pom.xml";
-                        //NOME DO ARTEFACTO     
-                        def artifactName = "${pom.artifactId}.${pom.packaging}" 
+                    if(GLOBAL_ENVIRONMENT != "NO BRANCH"){ 
+                        def artifactName = "${pom.artifactId}-${version}-${pom.packaging}.jar" 
                         //CAMINHO DO ARTEFACTO
                         def artifactPath = "target/${artifactName}" 
 
@@ -217,7 +198,7 @@ pipeline {
                         nexusArtifactUploader(
                             nexusVersion: NEXUS_VERSION, protocol: NEXUS_PROTOCOL,
                             nexusUrl: NEXUS_URL, groupId: pom.groupId,
-                            version: pom.version, repository: NEXUS_REPOSITORY,
+                            version: "${version}", repository: NEXUS_REPOSITORY,
                             credentialsId: NEXUS_CREDENTIAL_ID,
 
                             artifacts: [
@@ -227,6 +208,45 @@ pipeline {
                         );
                     }
                 }
+            }
+        }
+    }
+    post{ 
+        always{  
+            deleteDir() 
+        }
+        success{ 
+            echo "Success"      
+
+            script{
+                //Pipeline status specific message
+                msg_build_info = " > __Success__ after ${currentBuild.durationString.replace(' and counting', '')}"
+                
+                //Report the status to Teams
+                office365ConnectorSend message: "${msg_build_info}", status: "Sucess" ,webhookUrl: TEAMS_URL, color: msg_color_success
+            }
+        }
+        failure{
+            echo "Failure"  
+
+            script{
+                //Pipeline status specific message
+                msg_build_info = " > __Failure__ after ${currentBuild.durationString.replace(' and counting', '')}"
+
+                //Report the status to Teams
+                office365ConnectorSend message: "${msg_build_info}", status: "Failure" ,webhookUrl: TEAMS_URL, color: msg_color_failure
+            }
+        }
+        aborted{
+            echo "Aborted"   
+
+            script{
+                //Pipeline status specific message
+                msg_build_info = " > __Aborted__ after ${currentBuild.durationString.replace(' and counting', '')}"
+
+                //Report the status to Teams
+                office365ConnectorSend message: "${msg_build_info}", status: "Aborted" ,webhookUrl: TEAMS_URL, color: msg_color_aborted
+
             }
         }
     }
