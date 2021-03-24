@@ -107,15 +107,16 @@ pipeline {
             steps{
                 script{
                     //READ POM
-                    def pom = readMavenPom file: "pom.xml"  
+                    pom = readMavenPom file: "pom.xml"  
                     //GET POM VERSION
-                    def version = "${pom.version}"
+                    version = "${pom.version}"
                     echo "$version"   
                 }
             }
         }
         stage("SIT") {
             steps {
+		    echo "${version}"
                 script {                                                                                                     
                     if(GLOBAL_ENVIRONMENT == 'SIT'){       
                     
