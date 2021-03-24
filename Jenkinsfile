@@ -199,15 +199,11 @@ pipeline {
             steps { 
 		echo "${pom}"
                 script {
-                    if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
+		if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
                         echo "INSIDE NEXUS PUBLISHER"
-			def pom = readMavenPom file: "pom.xml";
-                        //NOME DO ARTEFACTO     
-                        def artifactName = "${pom.artifactId}-${pom.version}-${pom.packaging}.jar" 
-                        //CAMINHO DO ARTEFACTO
+                        def artifactName = "${pom.artifactId}.${pom.packaging}" //NOME DO ARTEFACTO
                         def artifactPath = "target/${artifactName}" 
 
-                        //FAZ UPLOAD PARA NEXUS
                         nexusArtifactUploader(
                             nexusVersion: NEXUS_VERSION, protocol: NEXUS_PROTOCOL,
                             nexusUrl: NEXUS_URL, groupId: pom.groupId,
