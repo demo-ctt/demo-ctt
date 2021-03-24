@@ -201,6 +201,7 @@ pipeline {
                 script {
                     if(GLOBAL_ENVIRONMENT != "NO BRANCH"){
                         echo "INSIDE NEXUS PUBLISHER"
+			def pom = readMavenPom file: "pom.xml";
                         //NOME DO ARTEFACTO     
                         def artifactName = "${pom.artifactId}-${pom.version}-${pom.packaging}.jar" 
                         //CAMINHO DO ARTEFACTO
