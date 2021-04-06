@@ -4,7 +4,7 @@ pipeline {
         //TRIGGER DEV (30 em 30 minutos)
         //TRIGGER SIT (1x/dia) as (10 da noite) de (segunda a sexta)
 	    parameterizedCron('''
-		    */30 * * * 1-5 %Ambiente=DEV
+		    */2 * * * 1-5 %Ambiente=DEV
 		    * 22 * * 1-5 %Ambiente=SIT
 		    ''') }         
     
