@@ -2,7 +2,6 @@
                               Cargo Tracker
             Applied Domain-Driven Design Blue Prints for Java EE
 ================================================================================
-
 Overview
 ========
 The project demonstrates how you can develop applications with the Java EE 
