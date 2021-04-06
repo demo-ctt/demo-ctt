@@ -52,7 +52,7 @@ pipeline {
 	   stage("CHECK CHANGES IN BRANCH"){
     		steps{
         		script{
-            			git_changeset_raw = sh(returnStdout: true, script: "@git diff-tree --no-commit-id --name-only -r -m \"${env.GIT_COMMIT}\" ")
+            			git_changeset_raw = sh(returnStdout: true, script: "git diff-tree --no-commit-id --name-only -r -m \"${env.GIT_COMMIT}\" ")
             			println(git_changeset_raw)
 
  				git_changeset_list = git_changeset_raw.split("\n")
