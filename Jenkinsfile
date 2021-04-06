@@ -57,9 +57,9 @@ pipeline {
 
  				git_changeset_list = git_changeset_raw.split("\n")
 				println(git_changeset_list)
-            			if(git_changeset_list.size()==0){
+            			if(git_changeset_list.size()>0){
                 			println("CHANGES WERE MADE, MUST PROCEED")
-            			}else if(git_changeset_list.size()>0){
+            			}else if(git_changeset_list.size()==0){
                				currentBuild.result = 'ABORTED'
                 			error "NO CHANGES WERE MADE, NO BUILD IS NECESSARY"
             			}
