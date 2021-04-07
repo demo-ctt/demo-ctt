@@ -52,6 +52,7 @@ pipeline {
 	   stage("CHECK CHANGES IN BRANCH"){
     		steps{
         		script{
+				sh 'printenv'
             			git_changeset_raw = sh(returnStdout: true, script: "git diff-tree --no-commit-id --name-only -r -m \"${env.GIT_COMMIT}\" ")
             			println(git_changeset_raw)
 
