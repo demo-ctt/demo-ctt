@@ -51,19 +51,14 @@ pipeline {
     stages {  
 	   stage("CHECK CHANGES IN BRANCH"){
     		steps{
-        		script{
+        		script{		
 				sh 'printenv'
-            			git_changeset_raw = sh(returnStdout: true, script: "git diff-tree --no-commit-id --name-only -r -m \"${env.GIT_COMMIT}\" ")
-            			println(git_changeset_raw)
-
- 				git_changeset_list = git_changeset_raw.split("\n")
-				println(git_changeset_list)
-            			if(git_changeset_list.size()>0){
-                			println("CHANGES WERE MADE, MUST PROCEED")
-            			}else if(git_changeset_list.size()==0){
-               				currentBuild.result = 'ABORTED'
-                			error "NO CHANGES WERE MADE, NO BUILD IS NECESSARY"
-            			}
+				if(env.GIT_COMMIT != env.GIT_PREVIOUS_COMMIT){
+					println("CHANGES WERE MADE, MUST PROCEED")
+				}else{
+					currentBuild.result = 'ABORTED'
+					error "NO CHANGES WERE MADE, NO BUILD IS NECESSARY"
+				}		
         		}
     		}
 	} 
